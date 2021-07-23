@@ -17,7 +17,6 @@ size_t WriteCallback(char *contents, size_t size, size_t nmemb, void *userp) {
  * 
  * @param[out] httpCode the response code from http request
  * @param[out] readBuffer the response ip address from http request
- * @return assigns ip address to _myIpAddress as given by getIpAddress()
  */
 inline void getIpAddress(long *httpCode, std::string *readBuffer) {
   std::string url = TICKER_END_POINT;
