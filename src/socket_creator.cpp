@@ -3,14 +3,14 @@
 #include <socket/socket_utils.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <thread>
 
 // Connect to the server upon socket creation
-Socket::Socket(char *&ipAddress, char *&portNum) : _connectionOpen(false) {
+Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
+               std::string peerName)
+    : _connectionOpen(false), _userName(userName), _peerName(peerName) {
 
   // Get own ip address
   _setIpAddress();
-
   std::cout << ipAddress << ":" << portNum << std::endl;
   memset(&this->_hints, 0, sizeof(_hints));
   _hints.ai_family = AF_UNSPEC;
@@ -19,7 +19,35 @@ Socket::Socket(char *&ipAddress, char *&portNum) : _connectionOpen(false) {
   _addrInfo = getaddrinfo(ipAddress, portNum, &_hints, &_p);
 
   _connectToServer();
-  
+}
+
+// Destructor
+Socket::~Socket() { _t.join(); }
+
+// TODO: This implementation will change, since this is just a feasibility
+// example
+/**
+ * Listens to server, started on a thread.
+ * Waits for instructions from the server, related to info of peer to connect to
+ */
+void Socket::_listenToServer() {
+  std::cout << "Started thread" << std::endl;
+  int res;
+  char buffer[128];
+
+  do {
+    memset(buffer, 0, 128);
+    int bytesReceived = recv(_sockFD, buffer, 128, 0);
+
+    if (bytesReceived == 0) {
+      throw std::runtime_error(
+          "Error receiving message. Connection closed by server");
+    } else {
+      std::ostringstream ss;
+      ss << buffer;
+      std::cout << "Message: " << ss.str() << std::endl;
+    }
+  } while (true);
 }
 
 /**
@@ -57,17 +85,20 @@ void Socket::_connectToServer() {
   setsockopt(_sockFD, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value));
   int status = connect(_sockFD, _p->ai_addr, _p->ai_addrlen);
   std::cout << "Status: " << status << std::endl;
+  _t = std::thread(&Socket::_listenToServer, this);
+
+  std::string message = ipAddress() + "::" + _userName + "::" + _peerName;
 
   // Upon connection, send my IP address to the server
-  send(_sockFD, this->ipAddress().c_str(), this->ipAddress().length() + 1, 0);
+  send(_sockFD, message.c_str(), message.length() + 1, 0);
 
   _connectionOpen = true;
 }
 
 /**
- * Connects to peer. 
- * 
- * @param peerPort - Peer's port to connect to 
+ * Connects to peer.
+ *
+ * @param peerPort - Peer's port to connect to
  * @param peerIp - Peer's ip address to connect to
  */
 void Socket::_connectToPeer(std::uint16_t const peerPort,
