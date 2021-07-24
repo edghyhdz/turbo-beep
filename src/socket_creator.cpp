@@ -17,7 +17,7 @@ Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
   _hints.ai_socktype = SOCK_STREAM;
   _hints.ai_flags = AI_PASSIVE;
   _addrInfo = getaddrinfo(ipAddress, portNum, &_hints, &_p);
-
+  _bindToPort(); 
   _connectToServer();
 }
 
@@ -31,7 +31,6 @@ Socket::~Socket() { _t.join(); }
  * Waits for instructions from the server, related to info of peer to connect to
  */
 void Socket::_listenToServer() {
-  std::cout << "Started thread" << std::endl;
   int res;
   char buffer[128];
 
@@ -77,6 +76,30 @@ void Socket::_setIpAddress() {
 void Socket::_setPort() { socket_utils::getAvailablePort(&_myPort); }
 
 /**
+ * Binds to port that will be sent to the mediator and later from the mediator
+ * the the peer. It uses `_setPort()` to get an available port and assign it to
+ * `_myPort`
+ */
+void Socket::_bindToPort() {
+  // Get available port
+  _setPort(); 
+  unsigned int value = 1;
+  _connFD = socket(AF_INET, SOCK_STREAM, 0);
+  this->_myAddr.sin_family = AF_INET;
+  this->_myAddr.sin_port = htons(_myPort);
+  this->_myAddr.sin_addr.s_addr = INADDR_ANY;
+
+  setsockopt(_connFD, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value));
+
+  if (bind(_connFD, (struct sockaddr *)&_myAddr, sizeof(_myAddr)) == -1) {
+    std::cerr << "Can't bind to IP/Port";
+    throw std::runtime_error("Can't bind to IP/Port");
+  }
+  
+  std::cout << "Could bind to original port: " << 57000 << std::endl;
+}
+
+/**
  * Connects to server as given by the args `ipAddress` and `portNum`
  */
 void Socket::_connectToServer() {
@@ -89,7 +112,7 @@ void Socket::_connectToServer() {
   if (status == -1) {
     throw std::runtime_error("Error connecting to server"); 
   }
-  
+
   _t = std::thread(&Socket::_listenToServer, this);
   std::string message = ipAddress() + "::" + _userName + "::" + _peerName;
 
