@@ -84,9 +84,13 @@ void Socket::_connectToServer() {
   this->_sockFD = socket(_p->ai_family, _p->ai_socktype, _p->ai_protocol);
   setsockopt(_sockFD, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value));
   int status = connect(_sockFD, _p->ai_addr, _p->ai_addrlen);
-  std::cout << "Status: " << status << std::endl;
-  _t = std::thread(&Socket::_listenToServer, this);
 
+  // Start listening to server after connection
+  if (status == -1) {
+    throw std::runtime_error("Error connecting to server"); 
+  }
+  
+  _t = std::thread(&Socket::_listenToServer, this);
   std::string message = ipAddress() + "::" + _userName + "::" + _peerName;
 
   // Upon connection, send my IP address to the server
