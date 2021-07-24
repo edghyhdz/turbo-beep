@@ -28,6 +28,7 @@ private:
   addrinfo _hints, *_p;
   struct sockaddr_in _myAddr, peerAddr;
   void _setIpAddress();
+  void _setPort(); 
   void _connectToServer();
   void _listenToServer(); 
   void _connectToPeer(std::uint16_t const peerPort, std::string const peerIp);
