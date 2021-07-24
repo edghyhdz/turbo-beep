@@ -22,7 +22,7 @@ public:
 
 private:
   addrinfo _hints, *_p;
-  struct sockaddr_in _myAddr, peerAddr;
+  struct sockaddr_in _myAddr, _peerAddr;
   void _setIpAddress();
   void _setPort(); 
   void _connectToServer();
