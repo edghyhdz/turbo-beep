@@ -17,7 +17,7 @@ Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
   _hints.ai_socktype = SOCK_STREAM;
   _hints.ai_flags = AI_PASSIVE;
   _addrInfo = getaddrinfo(ipAddress, portNum, &_hints, &_p);
-  _bindToPort(); 
+  _bindToPort();
 }
 
 // Destructor
@@ -43,27 +43,27 @@ void Socket::_listenToServer() {
     } else {
       std::ostringstream ss;
       ss << buffer;
-      std::string s = ss.str(); 
+      std::string s = ss.str();
       std::cout << "Message new: " << s << std::endl;
 
       // Server sent peer's ip and port
-      std::string delimiter{":"}; 
-      if (s.find(delimiter) != std::string::npos){
+      std::string delimiter{":"};
+      if (s.find(delimiter) != std::string::npos) {
         size_t pos = 0;
 
         while ((pos = s.find(delimiter)) != std::string::npos) {
-          _peerIpAddress = s.substr(0, pos); 
+          _peerIpAddress = s.substr(0, pos);
           s.erase(0, pos + delimiter.length());
         }
-        _peerPort = stoi(s); 
-        std::cout << "Peer ip: " << _peerIpAddress << std::endl; 
-        std::cout << "Peer port: " << _peerPort << std::endl; 
-        break; 
+        _peerPort = stoi(s);
+        std::cout << "Peer ip: " << _peerIpAddress << std::endl;
+        std::cout << "Peer port: " << _peerPort << std::endl;
+        break;
       }
     }
   } while (true);
-  std::cout << "Exiting this thing " << std::endl; 
-  
+  std::cout << "Exiting this thing " << std::endl;
+
   // Notify so that connectToServer() can return
   std::lock_guard<std::mutex> lck(_mutex);
   this->_cond.notify_one();
@@ -102,7 +102,7 @@ void Socket::_setPort() { socket_utils::getAvailablePort(&_myPort); }
  */
 void Socket::_bindToPort() {
   // Get available port
-  _setPort(); 
+  _setPort();
   unsigned int value = 1;
   _connFD = socket(AF_INET, SOCK_STREAM, 0);
   this->_myAddr.sin_family = AF_INET;
@@ -131,15 +131,15 @@ void Socket::_connectToServer() {
 
   // Start listening to server after connection
   if (status == -1) {
-    throw std::runtime_error("Error connecting to server"); 
+    throw std::runtime_error("Error connecting to server");
   }
 
-  // Start a thread to wait for response of server confirming 
+  // Start a thread to wait for response of server confirming
   // peer has connected
   _t = std::thread(&Socket::_listenToServer, this);
 
   // Send message containing this peer info
-  std::string message = ipAddress() + "::" + std::to_string(_myPort) +
+  std::string message = ipAddress() + "::" + std::to_string(port()) +
                         "::" + _userName + "::" + _peerName;
 
   // Upon connection, send my IP address to the server
@@ -148,14 +148,19 @@ void Socket::_connectToServer() {
   _connectionOpen = true;
 }
 
-void Socket::connectToServer(){
+/**
+ * Public method implementation of _connectToServer.
+ * Including also `_cond` to wait for _listenToServer() to retrieve peer port
+ * and ip address. 
+ * After that this method will return
+ */
+void Socket::connectToServer() {
   _connectToServer();
 
   // wait until other client has connected
-  std::unique_lock<std::mutex> lck(_mutex); 
-  _cond.wait(lck); 
-  std::cout << "Returning now..." << std::endl; 
-
+  std::unique_lock<std::mutex> lck(_mutex);
+  _cond.wait(lck);
+  std::cout << "Returning now..." << std::endl;
 }
 
 /**
@@ -181,16 +186,17 @@ void Socket::connectToPeer() {
     if (res == -1) {
       if (j >= 10)
         throw std::runtime_error("can't connect to the other client\n");
-      std::cout << "Connection timed out... trying again." << std::endl; 
+      std::cout << "Connection timed out... trying again." << std::endl;
       sleep(5);
     } else
       break;
   }
 
   std::cout << "Connected ..." << std::endl;
-  ::close(_sockFD); 
-  std::string message = "Hello world from " + _peerIpAddress + ":" + std::to_string(_peerPort);
-  strcpy(bufferSend, message.c_str()  );
+  ::close(_sockFD);
+  std::string message =
+      "Hello world from " + _peerIpAddress + ":" + std::to_string(_peerPort);
+  strcpy(bufferSend, message.c_str());
 
   // Send and receive messages from the connected peer
   while (1) {
