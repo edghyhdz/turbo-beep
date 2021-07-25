@@ -18,7 +18,6 @@ Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
   _hints.ai_flags = AI_PASSIVE;
   _addrInfo = getaddrinfo(ipAddress, portNum, &_hints, &_p);
   _bindToPort(); 
-  _connectToServer();
 }
 
 // Destructor
@@ -64,6 +63,10 @@ void Socket::_listenToServer() {
     }
   } while (true);
   std::cout << "Exiting this thing " << std::endl; 
+  
+  // Notify so that connectToServer() can return
+  std::lock_guard<std::mutex> lck(_mutex);
+  this->_cond.notify_one();
 }
 
 /**
@@ -143,6 +146,16 @@ void Socket::_connectToServer() {
   send(_sockFD, message.c_str(), message.length() + 1, 0);
 
   _connectionOpen = true;
+}
+
+void Socket::connectToServer(){
+  _connectToServer();
+
+  // wait until other client has connected
+  std::unique_lock<std::mutex> lck(_mutex); 
+  _cond.wait(lck); 
+  std::cout << "Returning now..." << std::endl; 
+
 }
 
 /**
