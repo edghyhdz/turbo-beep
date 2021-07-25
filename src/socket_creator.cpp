@@ -44,9 +44,27 @@ void Socket::_listenToServer() {
     } else {
       std::ostringstream ss;
       ss << buffer;
-      std::cout << "Message: " << ss.str() << std::endl;
+      std::string s = ss.str(); 
+      std::cout << "Message new: " << s << std::endl;
+
+      // Server sent peer's ip and port
+      std::string delimiter{":"}; 
+      if (s.find(delimiter) != std::string::npos){
+        size_t pos = 0;
+
+        while ((pos = s.find(delimiter)) != std::string::npos) {
+          _peerIpAddress = s.substr(0, pos); 
+          s.erase(0, pos + delimiter.length());
+        }
+        _peerPort = stoi(s); 
+        std::cout << "Peer ip: " << _peerIpAddress << std::endl; 
+        std::cout << "Peer port: " << _peerPort << std::endl; 
+        break; 
+      }
     }
   } while (true);
+  std::cout << "Exiting this thing " << std::endl; 
+  // ::close(_sockFD);
 }
 
 /**
@@ -95,14 +113,15 @@ void Socket::_bindToPort() {
     std::cerr << "Can't bind to IP/Port";
     throw std::runtime_error("Can't bind to IP/Port");
   }
-  
-  std::cout << "Could bind to original port: " << 57000 << std::endl;
+
+  std::cout << "Could bind to port: " << _myPort << std::endl;
 }
 
 /**
  * Connects to server as given by the args `ipAddress` and `portNum`
  */
 void Socket::_connectToServer() {
+
   unsigned int value = 1;
   this->_sockFD = socket(_p->ai_family, _p->ai_socktype, _p->ai_protocol);
   setsockopt(_sockFD, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value));
@@ -113,8 +132,13 @@ void Socket::_connectToServer() {
     throw std::runtime_error("Error connecting to server"); 
   }
 
+  // Start a thread to wait for response of server confirming 
+  // peer has connected
   _t = std::thread(&Socket::_listenToServer, this);
-  std::string message = ipAddress() + "::" + _userName + "::" + _peerName;
+
+  // Send message containing this peer info
+  std::string message = ipAddress() + "::" + std::to_string(_myPort) +
+                        "::" + _userName + "::" + _peerName;
 
   // Upon connection, send my IP address to the server
   send(_sockFD, message.c_str(), message.length() + 1, 0);
@@ -128,5 +152,44 @@ void Socket::_connectToServer() {
  * @param peerPort - Peer's port to connect to
  * @param peerIp - Peer's ip address to connect to
  */
-void Socket::_connectToPeer(std::uint16_t const peerPort,
-                            std::string const peerIp) {}
+void Socket::connectToPeer() {
+  char buffer[128];
+  char bufferSend[128];
+
+  _peerAddr.sin_family = AF_INET;
+  _peerAddr.sin_addr.s_addr = INADDR_ANY;
+  _peerAddr.sin_port = htons(_peerPort);
+  _peerAddr.sin_addr.s_addr = inet_addr(_peerIpAddress.c_str());
+
+  // Try to connect to the other peer at the same time
+  int res;
+  while (1) {
+    static int j = 1;
+    res = connect(_connFD, (struct sockaddr *)&_peerAddr, sizeof(_peerAddr));
+    if (res == -1) {
+      if (j >= 10)
+        throw std::runtime_error("can't connect to the other client\n");
+      std::cout << "Connection timed out... trying again." << std::endl; 
+      sleep(5);
+    } else
+      break;
+  }
+
+  std::cout << "Connected ..." << std::endl;
+  ::close(_sockFD); 
+  std::string message = "Hello world from " + _peerIpAddress + ":" + std::to_string(_peerPort);
+  strcpy(bufferSend, message.c_str()  );
+
+  // Send and receive messages from the connected peer
+  while (1) {
+    res = send(_connFD, bufferSend, strlen(bufferSend) + 1, 0);
+    if (res <= 0)
+      throw std::runtime_error("write error");
+    sleep(1);
+
+    res = recv(_connFD, buffer, 4096, 0);
+    if (res <= 0)
+      throw std::runtime_error("read error");
+    std::cout << "Received message: " << buffer << std::endl;
+  }
+}
