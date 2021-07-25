@@ -41,9 +41,14 @@ public:
   void runServer();
 
 private:
+  void _updatePeerInfo(std::string const &user, std::string const &peer); 
+  void _findPeer(std::string const &user, std::string const &peer);
+  void _removePeer(int const &socket);
+  void _readyToP2P(int const &socket);
+  void _findPeerInformation(std::string &buffer, int sock);
   int _listening;
   fd_set _master;
-  std::map<std::string, userInfo> _peerToPeer; 
+  std::map<std::string, userInfo> _userDescriptor; 
 };
 
 #endif
