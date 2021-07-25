@@ -15,6 +15,8 @@ Server class definition
 #include <map>
 #include <set>
 
+class TestServer; 
+
 // Used to keep track of connecting peer info as well as peer to connect to
 struct peerInfo {
   std::string name;
@@ -49,6 +51,8 @@ private:
   int _listening;
   fd_set _master;
   std::map<std::string, userInfo> _userDescriptor; 
+
+  friend TestServer; 
 };
 
 #endif
