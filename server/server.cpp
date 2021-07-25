@@ -92,7 +92,6 @@ void Server::_findPeer(std::string const &user, std::string const &peer) {
 void Server::_removePeer(int const &socket) {
   for (auto key_val : _userDescriptor) {
     if (socket == key_val.second.socket) {
-      std::cout << "Erased: " << key_val.second.name << std::endl;
       _userDescriptor.erase(key_val.second.name);
       break;
     }
@@ -157,15 +156,6 @@ void Server::_findPeerInformation(std::string &buffer, int sock){
       _userDescriptor.insert(std::make_pair(params[2], newUser));
       _findPeer(params[2], params[3]);
     }
-
-    for (auto const &key_val : _userDescriptor) {
-      std::cout << key_val.first
-                << " has address: " << key_val.second.ipAddress << ":"
-                << key_val.second.port
-                << " with socket: " << key_val.second.socket
-                << " and peer to connect to: " << key_val.second.peerInfo.name
-                << std::endl;
-    }
   }
 }
 
@@ -204,7 +194,6 @@ void Server::runServer() {
           _findPeerInformation(s, sock); 
         }
         // Check if both peers are connected and ready to start a P2P connection
-        std::cout << "Sock " << sock << std::endl;
         _readyToP2P(sock);
       }
     }
