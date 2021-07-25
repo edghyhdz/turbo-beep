@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 3.13)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 project(p2p)
 
 find_package(CURL)
+find_package(Threads REQUIRED)
 message("Found CURL_LIBRARIES: ${CURL_LIBRARIES}")
-
-# Find all executables
-# file(GLOB project_SRCS src/socket/*.h src/*.cpp src/*.h, ) #src/*.h
-# message("ALL EXECUTABLES: ${project_SRCS}")
 
 add_executable(p2p
     include/socket_creator.h
@@ -26,7 +23,4 @@ target_include_directories(p2p
         PRIVATE
         src)
 
-
-# Add project executable
-# add_executable(p2p ${project_SRCS})
-target_link_libraries(p2p ${CURL_LIBRARIES})
+target_link_libraries(p2p ${CURL_LIBRARIES} Threads::Threads)
