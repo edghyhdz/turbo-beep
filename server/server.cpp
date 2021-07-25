@@ -176,7 +176,6 @@ int Server::initServer() {
 }
 
 void Server::runServer() {
-  std::map<int, int> socketToUser;
   std::map<std::string, userInfo> userDescriptor;
 
   while (true) {
