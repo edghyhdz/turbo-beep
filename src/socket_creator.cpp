@@ -64,7 +64,6 @@ void Socket::_listenToServer() {
     }
   } while (true);
   std::cout << "Exiting this thing " << std::endl; 
-  // ::close(_sockFD);
 }
 
 /**
