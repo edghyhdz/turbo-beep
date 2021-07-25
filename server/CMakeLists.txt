@@ -7,11 +7,3 @@ add_executable(server
     server.cpp
     main.cpp
 )
-
-# target_include_directories(server
-#         PUBLIC
-#         include
-#         PRIVATE
-#         src)
-
-# target_link_libraries(server ${CURL_LIBRARIES} Threads::Threads)
