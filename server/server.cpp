@@ -19,7 +19,7 @@
  * Server class member definitions
  */
 
-Server::Server() { this->initServer(); }
+Server::Server(std::uint16_t port) : _serverPort(port) { this->initServer(); }
 
 Server::~Server() {
   FD_CLR(_listening, &_master);
@@ -28,7 +28,7 @@ Server::~Server() {
 
 int Server::initServer() {
   this->_listening = socket(AF_INET, SOCK_STREAM, 0);
-
+  int value{1};
   if (_listening == -1) {
     throw std::runtime_error("Can't create a socket"); 
   }
@@ -36,8 +36,10 @@ int Server::initServer() {
   // Bind the socket to an IP / Port
   sockaddr_in hint;
   hint.sin_family = AF_INET;
-  hint.sin_port = htons(PORT_SERVER);
+  hint.sin_port = htons(_serverPort);
   inet_pton(AF_INET, "0.0.0.0", &hint.sin_addr);
+
+  setsockopt(_listening, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value));
 
   if (bind(_listening, (sockaddr *)&hint, sizeof(hint)) == -1) {
     throw std::runtime_error("Can't bind to IP/Port");
