@@ -37,7 +37,7 @@ struct userInfo {
 // Server class declaration
 class Server {
 public:
-  Server();
+  Server(std::uint16_t port=54700);
   ~Server();
   int initServer();
   void runServer();
@@ -51,6 +51,7 @@ private:
   int _listening;
   fd_set _master;
   std::map<std::string, userInfo> _userDescriptor; 
+  std::uint16_t _serverPort; 
 
   friend TestServer; 
 };
