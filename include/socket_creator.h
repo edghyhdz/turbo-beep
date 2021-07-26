@@ -4,13 +4,20 @@
 
 #ifndef SOCKET_CREATOR
 #define SOCKET_CREATOR
+#include "payload.pb.h"
 #include <arpa/inet.h>
 #include <condition_variable>
+#include <google/protobuf/descriptor.h>
+#include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <memory>
 #include <mutex>
 #include <netdb.h>
 #include <thread>
 #include <unistd.h>
+
+typedef google::protobuf::io::CodedOutputStream output_stream; 
+typedef google::protobuf::io::ArrayOutputStream array_output_stream; 
 
 class Socket {
 public:
@@ -19,9 +26,12 @@ public:
   ~Socket();
   void connectToServer();
   void connectToPeer();
+  void peerInfoToPayload(int *size, payload::packet *packet);
+  void serializeMessage(output_stream *coded_output, payload::packet &packet);
   void close();
   std::string ipAddress() const { return _myIpAddress; }
   std::uint16_t port() const { return _myPort; }
+  std::string userName() const {return _userName; }
 
 private:
   addrinfo _hints, *_p;
