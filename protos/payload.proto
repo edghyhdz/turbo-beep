@@ -1,0 +1,32 @@
+syntax = "proto2";
+
+package payload;
+
+message packet {
+  required fixed64 time_stamp = 1;
+
+  enum MessageTypes {
+      PEER_INFO = 0; 
+      ADVERTISE = 1; 
+  }
+
+  message Payload {
+      required MessageTypes type = 1 [default = PEER_INFO];
+      optional PeerInfo peerInfo = 2;
+      optional Crypto crypto = 3; 
+  }
+
+  message PeerInfo {
+      required string ipAddress = 1; 
+      required string port = 2; 
+      required string userName = 3; 
+  }
+
+  message Crypto {
+      optional string clientKey = 1; 
+      optional bytes hashedKey = 2; 
+      optional bytes encryptedHashedKey = 3; 
+      optional bytes encryptedMsg = 4;  
+  }
+
+}
