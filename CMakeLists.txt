@@ -5,10 +5,13 @@ enable_testing()
 
 find_package(CURL)
 find_package(Threads REQUIRED)
-message("Found CURL_LIBRARIES: ${CURL_LIBRARIES}")
+find_package(Protobuf REQUIRED)
 
 add_executable(p2p
     include/socket_creator.h
+    protos/payload.pb.h
+    protos/payload.pb.cc
+    protos/payload.proto
     src/socket_creator.cpp
     src/socket/socket_utils.h
     src/socket/socket_utils.h
@@ -17,13 +20,20 @@ add_executable(p2p
     src/main.cpp
 )
 
+include_directories(protos)
+
 target_include_directories(p2p
         PUBLIC
         include
         PRIVATE
+        protos
         src)
 
 add_subdirectory(server)
 add_subdirectory(test)
 
-target_link_libraries(p2p ${CURL_LIBRARIES} Threads::Threads)
+target_link_libraries(p2p 
+    ${CURL_LIBRARIES} 
+    ${PROTOBUF_LIBRARY}
+    Threads::Threads
+)
