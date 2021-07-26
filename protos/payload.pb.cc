@@ -46,8 +46,9 @@ void protobuf_AssignDesc_payload_2eproto() {
       "payload.proto");
   GOOGLE_CHECK(file != NULL);
   packet_descriptor_ = file->message_type(0);
-  static const int packet_offsets_[1] = {
+  static const int packet_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(packet, time_stamp_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(packet, payload_),
   };
   packet_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
@@ -157,17 +158,18 @@ void protobuf_AddDesc_payload_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\rpayload.proto\022\007payload\"\202\003\n\006packet\022\022\n\nt"
-    "ime_stamp\030\001 \002(\006\032\224\001\n\007Payload\0225\n\004type\030\001 \002("
-    "\0162\034.payload.packet.MessageTypes:\tPEER_IN"
-    "FO\022*\n\010peerInfo\030\002 \001(\0132\030.payload.packet.Pe"
-    "erInfo\022&\n\006crypto\030\003 \001(\0132\026.payload.packet."
-    "Crypto\032=\n\010PeerInfo\022\021\n\tipAddress\030\001 \002(\t\022\014\n"
-    "\004port\030\002 \002(\t\022\020\n\010userName\030\003 \002(\t\032`\n\006Crypto\022"
-    "\021\n\tclientKey\030\001 \001(\t\022\021\n\thashedKey\030\002 \001(\014\022\032\n"
-    "\022encryptedHashedKey\030\003 \001(\014\022\024\n\014encryptedMs"
-    "g\030\004 \001(\014\",\n\014MessageTypes\022\r\n\tPEER_INFO\020\000\022\r"
-    "\n\tADVERTISE\020\001", 413);
+    "\n\rpayload.proto\022\007payload\"\254\003\n\006packet\022\022\n\nt"
+    "ime_stamp\030\001 \002(\006\022(\n\007payload\030\002 \002(\0132\027.paylo"
+    "ad.packet.Payload\032\224\001\n\007Payload\0225\n\004type\030\001 "
+    "\002(\0162\034.payload.packet.MessageTypes:\tPEER_"
+    "INFO\022*\n\010peerInfo\030\002 \001(\0132\030.payload.packet."
+    "PeerInfo\022&\n\006crypto\030\003 \001(\0132\026.payload.packe"
+    "t.Crypto\032=\n\010PeerInfo\022\021\n\tipAddress\030\001 \002(\t\022"
+    "\014\n\004port\030\002 \002(\r\022\020\n\010userName\030\003 \002(\t\032`\n\006Crypt"
+    "o\022\021\n\tclientKey\030\001 \002(\t\022\021\n\thashedKey\030\002 \002(\014\022"
+    "\032\n\022encryptedHashedKey\030\003 \002(\014\022\024\n\014encrypted"
+    "Msg\030\004 \002(\014\",\n\014MessageTypes\022\r\n\tPEER_INFO\020\000"
+    "\022\r\n\tADVERTISE\020\001", 455);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "payload.proto", &protobuf_RegisterTypes);
   packet::default_instance_ = new packet();
@@ -528,6 +530,9 @@ bool packet_Payload::IsInitialized() const {
   if (has_peerinfo()) {
     if (!this->peerinfo_->IsInitialized()) return false;
   }
+  if (has_crypto()) {
+    if (!this->crypto_->IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -582,7 +587,7 @@ void packet_PeerInfo::SharedCtor() {
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   ipaddress_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  port_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  port_ = 0u;
   username_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -594,7 +599,6 @@ packet_PeerInfo::~packet_PeerInfo() {
 
 void packet_PeerInfo::SharedDtor() {
   ipaddress_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  port_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   username_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
   }
@@ -631,9 +635,7 @@ void packet_PeerInfo::Clear() {
     if (has_ipaddress()) {
       ipaddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     }
-    if (has_port()) {
-      port_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    }
+    port_ = 0u;
     if (has_username()) {
       username_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     }
@@ -666,20 +668,18 @@ bool packet_PeerInfo::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(18)) goto parse_port;
+        if (input->ExpectTag(16)) goto parse_port;
         break;
       }
 
-      // required string port = 2;
+      // required uint32 port = 2;
       case 2: {
-        if (tag == 18) {
+        if (tag == 16) {
          parse_port:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_port()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->port().data(), this->port().length(),
-            ::google::protobuf::internal::WireFormat::PARSE,
-            "payload.packet.PeerInfo.port");
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &port_)));
+          set_has_port();
         } else {
           goto handle_unusual;
         }
@@ -739,14 +739,9 @@ void packet_PeerInfo::SerializeWithCachedSizes(
       1, this->ipaddress(), output);
   }
 
-  // required string port = 2;
+  // required uint32 port = 2;
   if (has_port()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->port().data(), this->port().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "payload.packet.PeerInfo.port");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      2, this->port(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->port(), output);
   }
 
   // required string userName = 3;
@@ -780,15 +775,9 @@ void packet_PeerInfo::SerializeWithCachedSizes(
         1, this->ipaddress(), target);
   }
 
-  // required string port = 2;
+  // required uint32 port = 2;
   if (has_port()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->port().data(), this->port().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "payload.packet.PeerInfo.port");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        2, this->port(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->port(), target);
   }
 
   // required string userName = 3;
@@ -822,9 +811,9 @@ int packet_PeerInfo::RequiredFieldsByteSizeFallback() const {
   }
 
   if (has_port()) {
-    // required string port = 2;
+    // required uint32 port = 2;
     total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::StringSize(
+      ::google::protobuf::internal::WireFormatLite::UInt32Size(
         this->port());
   }
 
@@ -847,9 +836,9 @@ int packet_PeerInfo::ByteSize() const {
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->ipaddress());
 
-    // required string port = 2;
+    // required uint32 port = 2;
     total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::StringSize(
+      ::google::protobuf::internal::WireFormatLite::UInt32Size(
         this->port());
 
     // required string userName = 3;
@@ -899,8 +888,7 @@ void packet_PeerInfo::MergeFrom(const packet_PeerInfo& from) {
       ipaddress_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.ipaddress_);
     }
     if (from.has_port()) {
-      set_has_port();
-      port_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.port_);
+      set_port(from.port());
     }
     if (from.has_username()) {
       set_has_username();
@@ -938,7 +926,7 @@ void packet_PeerInfo::Swap(packet_PeerInfo* other) {
 }
 void packet_PeerInfo::InternalSwap(packet_PeerInfo* other) {
   ipaddress_.Swap(&other->ipaddress_);
-  port_.Swap(&other->port_);
+  std::swap(port_, other->port_);
   username_.Swap(&other->username_);
   std::swap(_has_bits_[0], other->_has_bits_[0]);
   _internal_metadata_.Swap(&other->_internal_metadata_);
@@ -1061,7 +1049,7 @@ bool packet_Crypto::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional string clientKey = 1;
+      // required string clientKey = 1;
       case 1: {
         if (tag == 10) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
@@ -1077,7 +1065,7 @@ bool packet_Crypto::MergePartialFromCodedStream(
         break;
       }
 
-      // optional bytes hashedKey = 2;
+      // required bytes hashedKey = 2;
       case 2: {
         if (tag == 18) {
          parse_hashedKey:
@@ -1090,7 +1078,7 @@ bool packet_Crypto::MergePartialFromCodedStream(
         break;
       }
 
-      // optional bytes encryptedHashedKey = 3;
+      // required bytes encryptedHashedKey = 3;
       case 3: {
         if (tag == 26) {
          parse_encryptedHashedKey:
@@ -1103,7 +1091,7 @@ bool packet_Crypto::MergePartialFromCodedStream(
         break;
       }
 
-      // optional bytes encryptedMsg = 4;
+      // required bytes encryptedMsg = 4;
       case 4: {
         if (tag == 34) {
          parse_encryptedMsg:
@@ -1141,7 +1129,7 @@ failure:
 void packet_Crypto::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:payload.packet.Crypto)
-  // optional string clientKey = 1;
+  // required string clientKey = 1;
   if (has_clientkey()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->clientkey().data(), this->clientkey().length(),
@@ -1151,19 +1139,19 @@ void packet_Crypto::SerializeWithCachedSizes(
       1, this->clientkey(), output);
   }
 
-  // optional bytes hashedKey = 2;
+  // required bytes hashedKey = 2;
   if (has_hashedkey()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       2, this->hashedkey(), output);
   }
 
-  // optional bytes encryptedHashedKey = 3;
+  // required bytes encryptedHashedKey = 3;
   if (has_encryptedhashedkey()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       3, this->encryptedhashedkey(), output);
   }
 
-  // optional bytes encryptedMsg = 4;
+  // required bytes encryptedMsg = 4;
   if (has_encryptedmsg()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       4, this->encryptedmsg(), output);
@@ -1179,7 +1167,7 @@ void packet_Crypto::SerializeWithCachedSizes(
 ::google::protobuf::uint8* packet_Crypto::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:payload.packet.Crypto)
-  // optional string clientKey = 1;
+  // required string clientKey = 1;
   if (has_clientkey()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->clientkey().data(), this->clientkey().length(),
@@ -1190,21 +1178,21 @@ void packet_Crypto::SerializeWithCachedSizes(
         1, this->clientkey(), target);
   }
 
-  // optional bytes hashedKey = 2;
+  // required bytes hashedKey = 2;
   if (has_hashedkey()) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
         2, this->hashedkey(), target);
   }
 
-  // optional bytes encryptedHashedKey = 3;
+  // required bytes encryptedHashedKey = 3;
   if (has_encryptedhashedkey()) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
         3, this->encryptedhashedkey(), target);
   }
 
-  // optional bytes encryptedMsg = 4;
+  // required bytes encryptedMsg = 4;
   if (has_encryptedmsg()) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
@@ -1219,39 +1207,67 @@ void packet_Crypto::SerializeWithCachedSizes(
   return target;
 }
 
+int packet_Crypto::RequiredFieldsByteSizeFallback() const {
+// @@protoc_insertion_point(required_fields_byte_size_fallback_start:payload.packet.Crypto)
+  int total_size = 0;
+
+  if (has_clientkey()) {
+    // required string clientKey = 1;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->clientkey());
+  }
+
+  if (has_hashedkey()) {
+    // required bytes hashedKey = 2;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::BytesSize(
+        this->hashedkey());
+  }
+
+  if (has_encryptedhashedkey()) {
+    // required bytes encryptedHashedKey = 3;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::BytesSize(
+        this->encryptedhashedkey());
+  }
+
+  if (has_encryptedmsg()) {
+    // required bytes encryptedMsg = 4;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::BytesSize(
+        this->encryptedmsg());
+  }
+
+  return total_size;
+}
 int packet_Crypto::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:payload.packet.Crypto)
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & 15u) {
-    // optional string clientKey = 1;
-    if (has_clientkey()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->clientkey());
-    }
+  if (((_has_bits_[0] & 0x0000000f) ^ 0x0000000f) == 0) {  // All required fields are present.
+    // required string clientKey = 1;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->clientkey());
 
-    // optional bytes hashedKey = 2;
-    if (has_hashedkey()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::BytesSize(
-          this->hashedkey());
-    }
+    // required bytes hashedKey = 2;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::BytesSize(
+        this->hashedkey());
 
-    // optional bytes encryptedHashedKey = 3;
-    if (has_encryptedhashedkey()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::BytesSize(
-          this->encryptedhashedkey());
-    }
+    // required bytes encryptedHashedKey = 3;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::BytesSize(
+        this->encryptedhashedkey());
 
-    // optional bytes encryptedMsg = 4;
-    if (has_encryptedmsg()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::BytesSize(
-          this->encryptedmsg());
-    }
+    // required bytes encryptedMsg = 4;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::BytesSize(
+        this->encryptedmsg());
 
+  } else {
+    total_size += RequiredFieldsByteSizeFallback();
   }
   if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
@@ -1324,6 +1340,7 @@ void packet_Crypto::CopyFrom(const packet_Crypto& from) {
 }
 
 bool packet_Crypto::IsInitialized() const {
+  if ((_has_bits_[0] & 0x0000000f) != 0x0000000f) return false;
 
   return true;
 }
@@ -1355,6 +1372,7 @@ void packet_Crypto::InternalSwap(packet_Crypto* other) {
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int packet::kTimeStampFieldNumber;
+const int packet::kPayloadFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 packet::packet()
@@ -1364,6 +1382,7 @@ packet::packet()
 }
 
 void packet::InitAsDefaultInstance() {
+  payload_ = const_cast< ::payload::packet_Payload*>(&::payload::packet_Payload::default_instance());
 }
 
 packet::packet(const packet& from)
@@ -1377,6 +1396,7 @@ packet::packet(const packet& from)
 void packet::SharedCtor() {
   _cached_size_ = 0;
   time_stamp_ = GOOGLE_ULONGLONG(0);
+  payload_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1387,6 +1407,7 @@ packet::~packet() {
 
 void packet::SharedDtor() {
   if (this != default_instance_) {
+    delete payload_;
   }
 }
 
@@ -1417,7 +1438,12 @@ packet* packet::New(::google::protobuf::Arena* arena) const {
 
 void packet::Clear() {
 // @@protoc_insertion_point(message_clear_start:payload.packet)
-  time_stamp_ = GOOGLE_ULONGLONG(0);
+  if (_has_bits_[0 / 32] & 3u) {
+    time_stamp_ = GOOGLE_ULONGLONG(0);
+    if (has_payload()) {
+      if (payload_ != NULL) payload_->::payload::packet_Payload::Clear();
+    }
+  }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   if (_internal_metadata_.have_unknown_fields()) {
     mutable_unknown_fields()->Clear();
@@ -1441,6 +1467,19 @@ bool packet::MergePartialFromCodedStream(
                    ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_FIXED64>(
                  input, &time_stamp_)));
           set_has_time_stamp();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(18)) goto parse_payload;
+        break;
+      }
+
+      // required .payload.packet.Payload payload = 2;
+      case 2: {
+        if (tag == 18) {
+         parse_payload:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_payload()));
         } else {
           goto handle_unusual;
         }
@@ -1478,6 +1517,12 @@ void packet::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteFixed64(1, this->time_stamp(), output);
   }
 
+  // required .payload.packet.Payload payload = 2;
+  if (has_payload()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, *this->payload_, output);
+  }
+
   if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1493,6 +1538,13 @@ void packet::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteFixed64ToArray(1, this->time_stamp(), target);
   }
 
+  // required .payload.packet.Payload payload = 2;
+  if (has_payload()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      InternalWriteMessageNoVirtualToArray(
+        2, *this->payload_, false, target);
+  }
+
   if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -1501,13 +1553,39 @@ void packet::SerializeWithCachedSizes(
   return target;
 }
 
+int packet::RequiredFieldsByteSizeFallback() const {
+// @@protoc_insertion_point(required_fields_byte_size_fallback_start:payload.packet)
+  int total_size = 0;
+
+  if (has_time_stamp()) {
+    // required fixed64 time_stamp = 1;
+    total_size += 1 + 8;
+  }
+
+  if (has_payload()) {
+    // required .payload.packet.Payload payload = 2;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->payload_);
+  }
+
+  return total_size;
+}
 int packet::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:payload.packet)
   int total_size = 0;
 
-  // required fixed64 time_stamp = 1;
-  if (has_time_stamp()) {
+  if (((_has_bits_[0] & 0x00000003) ^ 0x00000003) == 0) {  // All required fields are present.
+    // required fixed64 time_stamp = 1;
     total_size += 1 + 8;
+
+    // required .payload.packet.Payload payload = 2;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->payload_);
+
+  } else {
+    total_size += RequiredFieldsByteSizeFallback();
   }
   if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
@@ -1546,6 +1624,9 @@ void packet::MergeFrom(const packet& from) {
     if (from.has_time_stamp()) {
       set_time_stamp(from.time_stamp());
     }
+    if (from.has_payload()) {
+      mutable_payload()->::payload::packet_Payload::MergeFrom(from.payload());
+    }
   }
   if (from._internal_metadata_.have_unknown_fields()) {
     mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -1567,8 +1648,11 @@ void packet::CopyFrom(const packet& from) {
 }
 
 bool packet::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
 
+  if (has_payload()) {
+    if (!this->payload_->IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -1578,6 +1662,7 @@ void packet::Swap(packet* other) {
 }
 void packet::InternalSwap(packet* other) {
   std::swap(time_stamp_, other->time_stamp_);
+  std::swap(payload_, other->payload_);
   std::swap(_has_bits_[0], other->_has_bits_[0]);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -1765,7 +1850,7 @@ void packet_PeerInfo::clear_ipaddress() {
   // @@protoc_insertion_point(field_set_allocated:payload.packet.PeerInfo.ipAddress)
 }
 
-// required string port = 2;
+// required uint32 port = 2;
 bool packet_PeerInfo::has_port() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -1776,47 +1861,17 @@ void packet_PeerInfo::clear_has_port() {
   _has_bits_[0] &= ~0x00000002u;
 }
 void packet_PeerInfo::clear_port() {
-  port_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  port_ = 0u;
   clear_has_port();
 }
- const ::std::string& packet_PeerInfo::port() const {
+ ::google::protobuf::uint32 packet_PeerInfo::port() const {
   // @@protoc_insertion_point(field_get:payload.packet.PeerInfo.port)
-  return port_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  return port_;
 }
- void packet_PeerInfo::set_port(const ::std::string& value) {
+ void packet_PeerInfo::set_port(::google::protobuf::uint32 value) {
   set_has_port();
-  port_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  port_ = value;
   // @@protoc_insertion_point(field_set:payload.packet.PeerInfo.port)
-}
- void packet_PeerInfo::set_port(const char* value) {
-  set_has_port();
-  port_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:payload.packet.PeerInfo.port)
-}
- void packet_PeerInfo::set_port(const char* value, size_t size) {
-  set_has_port();
-  port_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:payload.packet.PeerInfo.port)
-}
- ::std::string* packet_PeerInfo::mutable_port() {
-  set_has_port();
-  // @@protoc_insertion_point(field_mutable:payload.packet.PeerInfo.port)
-  return port_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- ::std::string* packet_PeerInfo::release_port() {
-  // @@protoc_insertion_point(field_release:payload.packet.PeerInfo.port)
-  clear_has_port();
-  return port_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- void packet_PeerInfo::set_allocated_port(::std::string* port) {
-  if (port != NULL) {
-    set_has_port();
-  } else {
-    clear_has_port();
-  }
-  port_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), port);
-  // @@protoc_insertion_point(field_set_allocated:payload.packet.PeerInfo.port)
 }
 
 // required string userName = 3;
@@ -1877,7 +1932,7 @@ void packet_PeerInfo::clear_username() {
 
 // packet_Crypto
 
-// optional string clientKey = 1;
+// required string clientKey = 1;
 bool packet_Crypto::has_clientkey() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -1931,7 +1986,7 @@ void packet_Crypto::clear_clientkey() {
   // @@protoc_insertion_point(field_set_allocated:payload.packet.Crypto.clientKey)
 }
 
-// optional bytes hashedKey = 2;
+// required bytes hashedKey = 2;
 bool packet_Crypto::has_hashedkey() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -1985,7 +2040,7 @@ void packet_Crypto::clear_hashedkey() {
   // @@protoc_insertion_point(field_set_allocated:payload.packet.Crypto.hashedKey)
 }
 
-// optional bytes encryptedHashedKey = 3;
+// required bytes encryptedHashedKey = 3;
 bool packet_Crypto::has_encryptedhashedkey() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -2039,7 +2094,7 @@ void packet_Crypto::clear_encryptedhashedkey() {
   // @@protoc_insertion_point(field_set_allocated:payload.packet.Crypto.encryptedHashedKey)
 }
 
-// optional bytes encryptedMsg = 4;
+// required bytes encryptedMsg = 4;
 bool packet_Crypto::has_encryptedmsg() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -2119,6 +2174,50 @@ void packet::clear_time_stamp() {
   set_has_time_stamp();
   time_stamp_ = value;
   // @@protoc_insertion_point(field_set:payload.packet.time_stamp)
+}
+
+// required .payload.packet.Payload payload = 2;
+bool packet::has_payload() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+void packet::set_has_payload() {
+  _has_bits_[0] |= 0x00000002u;
+}
+void packet::clear_has_payload() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+void packet::clear_payload() {
+  if (payload_ != NULL) payload_->::payload::packet_Payload::Clear();
+  clear_has_payload();
+}
+const ::payload::packet_Payload& packet::payload() const {
+  // @@protoc_insertion_point(field_get:payload.packet.payload)
+  return payload_ != NULL ? *payload_ : *default_instance_->payload_;
+}
+::payload::packet_Payload* packet::mutable_payload() {
+  set_has_payload();
+  if (payload_ == NULL) {
+    payload_ = new ::payload::packet_Payload;
+  }
+  // @@protoc_insertion_point(field_mutable:payload.packet.payload)
+  return payload_;
+}
+::payload::packet_Payload* packet::release_payload() {
+  // @@protoc_insertion_point(field_release:payload.packet.payload)
+  clear_has_payload();
+  ::payload::packet_Payload* temp = payload_;
+  payload_ = NULL;
+  return temp;
+}
+void packet::set_allocated_payload(::payload::packet_Payload* payload) {
+  delete payload_;
+  payload_ = payload;
+  if (payload) {
+    set_has_payload();
+  } else {
+    clear_has_payload();
+  }
+  // @@protoc_insertion_point(field_set_allocated:payload.packet.payload)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS

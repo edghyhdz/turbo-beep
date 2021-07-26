@@ -260,17 +260,12 @@ class packet_PeerInfo : public ::google::protobuf::Message /* @@protoc_insertion
   ::std::string* release_ipaddress();
   void set_allocated_ipaddress(::std::string* ipaddress);
 
-  // required string port = 2;
+  // required uint32 port = 2;
   bool has_port() const;
   void clear_port();
   static const int kPortFieldNumber = 2;
-  const ::std::string& port() const;
-  void set_port(const ::std::string& value);
-  void set_port(const char* value);
-  void set_port(const char* value, size_t size);
-  ::std::string* mutable_port();
-  ::std::string* release_port();
-  void set_allocated_port(::std::string* port);
+  ::google::protobuf::uint32 port() const;
+  void set_port(::google::protobuf::uint32 value);
 
   // required string userName = 3;
   bool has_username() const;
@@ -300,8 +295,8 @@ class packet_PeerInfo : public ::google::protobuf::Message /* @@protoc_insertion
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
   ::google::protobuf::internal::ArenaStringPtr ipaddress_;
-  ::google::protobuf::internal::ArenaStringPtr port_;
   ::google::protobuf::internal::ArenaStringPtr username_;
+  ::google::protobuf::uint32 port_;
   friend void  protobuf_AddDesc_payload_2eproto();
   friend void protobuf_AssignDesc_payload_2eproto();
   friend void protobuf_ShutdownFile_payload_2eproto();
@@ -379,7 +374,7 @@ class packet_Crypto : public ::google::protobuf::Message /* @@protoc_insertion_p
 
   // accessors -------------------------------------------------------
 
-  // optional string clientKey = 1;
+  // required string clientKey = 1;
   bool has_clientkey() const;
   void clear_clientkey();
   static const int kClientKeyFieldNumber = 1;
@@ -391,7 +386,7 @@ class packet_Crypto : public ::google::protobuf::Message /* @@protoc_insertion_p
   ::std::string* release_clientkey();
   void set_allocated_clientkey(::std::string* clientkey);
 
-  // optional bytes hashedKey = 2;
+  // required bytes hashedKey = 2;
   bool has_hashedkey() const;
   void clear_hashedkey();
   static const int kHashedKeyFieldNumber = 2;
@@ -403,7 +398,7 @@ class packet_Crypto : public ::google::protobuf::Message /* @@protoc_insertion_p
   ::std::string* release_hashedkey();
   void set_allocated_hashedkey(::std::string* hashedkey);
 
-  // optional bytes encryptedHashedKey = 3;
+  // required bytes encryptedHashedKey = 3;
   bool has_encryptedhashedkey() const;
   void clear_encryptedhashedkey();
   static const int kEncryptedHashedKeyFieldNumber = 3;
@@ -415,7 +410,7 @@ class packet_Crypto : public ::google::protobuf::Message /* @@protoc_insertion_p
   ::std::string* release_encryptedhashedkey();
   void set_allocated_encryptedhashedkey(::std::string* encryptedhashedkey);
 
-  // optional bytes encryptedMsg = 4;
+  // required bytes encryptedMsg = 4;
   bool has_encryptedmsg() const;
   void clear_encryptedmsg();
   static const int kEncryptedMsgFieldNumber = 4;
@@ -437,6 +432,9 @@ class packet_Crypto : public ::google::protobuf::Message /* @@protoc_insertion_p
   inline void clear_has_encryptedhashedkey();
   inline void set_has_encryptedmsg();
   inline void clear_has_encryptedmsg();
+
+  // helper for ByteSize()
+  int RequiredFieldsByteSizeFallback() const;
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::uint32 _has_bits_[1];
@@ -559,15 +557,30 @@ class packet : public ::google::protobuf::Message /* @@protoc_insertion_point(cl
   ::google::protobuf::uint64 time_stamp() const;
   void set_time_stamp(::google::protobuf::uint64 value);
 
+  // required .payload.packet.Payload payload = 2;
+  bool has_payload() const;
+  void clear_payload();
+  static const int kPayloadFieldNumber = 2;
+  const ::payload::packet_Payload& payload() const;
+  ::payload::packet_Payload* mutable_payload();
+  ::payload::packet_Payload* release_payload();
+  void set_allocated_payload(::payload::packet_Payload* payload);
+
   // @@protoc_insertion_point(class_scope:payload.packet)
  private:
   inline void set_has_time_stamp();
   inline void clear_has_time_stamp();
+  inline void set_has_payload();
+  inline void clear_has_payload();
+
+  // helper for ByteSize()
+  int RequiredFieldsByteSizeFallback() const;
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
   ::google::protobuf::uint64 time_stamp_;
+  ::payload::packet_Payload* payload_;
   friend void  protobuf_AddDesc_payload_2eproto();
   friend void protobuf_AssignDesc_payload_2eproto();
   friend void protobuf_ShutdownFile_payload_2eproto();
@@ -754,7 +767,7 @@ inline void packet_PeerInfo::set_allocated_ipaddress(::std::string* ipaddress) {
   // @@protoc_insertion_point(field_set_allocated:payload.packet.PeerInfo.ipAddress)
 }
 
-// required string port = 2;
+// required uint32 port = 2;
 inline bool packet_PeerInfo::has_port() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -765,47 +778,17 @@ inline void packet_PeerInfo::clear_has_port() {
   _has_bits_[0] &= ~0x00000002u;
 }
 inline void packet_PeerInfo::clear_port() {
-  port_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  port_ = 0u;
   clear_has_port();
 }
-inline const ::std::string& packet_PeerInfo::port() const {
+inline ::google::protobuf::uint32 packet_PeerInfo::port() const {
   // @@protoc_insertion_point(field_get:payload.packet.PeerInfo.port)
-  return port_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  return port_;
 }
-inline void packet_PeerInfo::set_port(const ::std::string& value) {
+inline void packet_PeerInfo::set_port(::google::protobuf::uint32 value) {
   set_has_port();
-  port_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  port_ = value;
   // @@protoc_insertion_point(field_set:payload.packet.PeerInfo.port)
-}
-inline void packet_PeerInfo::set_port(const char* value) {
-  set_has_port();
-  port_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:payload.packet.PeerInfo.port)
-}
-inline void packet_PeerInfo::set_port(const char* value, size_t size) {
-  set_has_port();
-  port_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:payload.packet.PeerInfo.port)
-}
-inline ::std::string* packet_PeerInfo::mutable_port() {
-  set_has_port();
-  // @@protoc_insertion_point(field_mutable:payload.packet.PeerInfo.port)
-  return port_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline ::std::string* packet_PeerInfo::release_port() {
-  // @@protoc_insertion_point(field_release:payload.packet.PeerInfo.port)
-  clear_has_port();
-  return port_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void packet_PeerInfo::set_allocated_port(::std::string* port) {
-  if (port != NULL) {
-    set_has_port();
-  } else {
-    clear_has_port();
-  }
-  port_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), port);
-  // @@protoc_insertion_point(field_set_allocated:payload.packet.PeerInfo.port)
 }
 
 // required string userName = 3;
@@ -866,7 +849,7 @@ inline void packet_PeerInfo::set_allocated_username(::std::string* username) {
 
 // packet_Crypto
 
-// optional string clientKey = 1;
+// required string clientKey = 1;
 inline bool packet_Crypto::has_clientkey() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -920,7 +903,7 @@ inline void packet_Crypto::set_allocated_clientkey(::std::string* clientkey) {
   // @@protoc_insertion_point(field_set_allocated:payload.packet.Crypto.clientKey)
 }
 
-// optional bytes hashedKey = 2;
+// required bytes hashedKey = 2;
 inline bool packet_Crypto::has_hashedkey() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -974,7 +957,7 @@ inline void packet_Crypto::set_allocated_hashedkey(::std::string* hashedkey) {
   // @@protoc_insertion_point(field_set_allocated:payload.packet.Crypto.hashedKey)
 }
 
-// optional bytes encryptedHashedKey = 3;
+// required bytes encryptedHashedKey = 3;
 inline bool packet_Crypto::has_encryptedhashedkey() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -1028,7 +1011,7 @@ inline void packet_Crypto::set_allocated_encryptedhashedkey(::std::string* encry
   // @@protoc_insertion_point(field_set_allocated:payload.packet.Crypto.encryptedHashedKey)
 }
 
-// optional bytes encryptedMsg = 4;
+// required bytes encryptedMsg = 4;
 inline bool packet_Crypto::has_encryptedmsg() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -1108,6 +1091,50 @@ inline void packet::set_time_stamp(::google::protobuf::uint64 value) {
   set_has_time_stamp();
   time_stamp_ = value;
   // @@protoc_insertion_point(field_set:payload.packet.time_stamp)
+}
+
+// required .payload.packet.Payload payload = 2;
+inline bool packet::has_payload() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void packet::set_has_payload() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void packet::clear_has_payload() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void packet::clear_payload() {
+  if (payload_ != NULL) payload_->::payload::packet_Payload::Clear();
+  clear_has_payload();
+}
+inline const ::payload::packet_Payload& packet::payload() const {
+  // @@protoc_insertion_point(field_get:payload.packet.payload)
+  return payload_ != NULL ? *payload_ : *default_instance_->payload_;
+}
+inline ::payload::packet_Payload* packet::mutable_payload() {
+  set_has_payload();
+  if (payload_ == NULL) {
+    payload_ = new ::payload::packet_Payload;
+  }
+  // @@protoc_insertion_point(field_mutable:payload.packet.payload)
+  return payload_;
+}
+inline ::payload::packet_Payload* packet::release_payload() {
+  // @@protoc_insertion_point(field_release:payload.packet.payload)
+  clear_has_payload();
+  ::payload::packet_Payload* temp = payload_;
+  payload_ = NULL;
+  return temp;
+}
+inline void packet::set_allocated_payload(::payload::packet_Payload* payload) {
+  delete payload_;
+  payload_ = payload;
+  if (payload) {
+    set_has_payload();
+  } else {
+    clear_has_payload();
+  }
+  // @@protoc_insertion_point(field_set_allocated:payload.packet.payload)
 }
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS

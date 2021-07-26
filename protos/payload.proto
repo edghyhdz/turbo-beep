@@ -18,15 +18,17 @@ message packet {
 
   message PeerInfo {
       required string ipAddress = 1; 
-      required string port = 2; 
+      required uint32 port = 2; 
       required string userName = 3; 
   }
 
   message Crypto {
-      optional string clientKey = 1; 
-      optional bytes hashedKey = 2; 
-      optional bytes encryptedHashedKey = 3; 
-      optional bytes encryptedMsg = 4;  
+      required string clientKey = 1; 
+      required bytes hashedKey = 2; 
+      required bytes encryptedHashedKey = 3; 
+      required bytes encryptedMsg = 4;  
   }
+
+  required Payload payload = 2; 
 
 }
