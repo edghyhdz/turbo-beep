@@ -23,6 +23,46 @@ Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
 // Destructor
 Socket::~Socket() { _t.join(); }
 
+/**
+ * Add peer information, _myPort, myIpAddress, myName, timestamp and message
+ * type to the protobuffer
+ *
+ * @param[in, out] size size of the serialized payload to send
+ * @param[in, out] packet packet object
+ */
+void Socket::peerInfoToPayload(int *size, payload::packet *packet) {
+
+  auto *payload = packet->mutable_payload();
+  auto *peerInfo = payload->mutable_peerinfo(); 
+
+  const auto timeStamp = std::chrono::system_clock::now();
+  long tS = std::chrono::duration_cast<std::chrono::milliseconds>(
+                timeStamp.time_since_epoch())
+                .count();
+
+  packet->set_time_stamp(tS); 
+  payload->set_type(packet->PEER_INFO);
+  peerInfo->set_port(this->port()); 
+  peerInfo->set_ipaddress(this->ipAddress());
+  peerInfo->set_username(this->userName()); 
+
+  *size = packet->ByteSize() + 4;
+}
+
+/**
+ * Serializes message packet after having added the data with
+ * peerInfoToPayload() method
+ *
+ * @param[in, out] coded_output serialized object to send to peer
+ * @param[in] packet packet object needed to serialize coded_output
+ */
+void Socket::serializeMessage(output_stream *coded_output,
+                              payload::packet &packet) {
+
+  coded_output->WriteVarint32(packet.ByteSize()); 
+  packet.SerializeToCodedStream(coded_output); 
+}
+
 // TODO: This implementation will change, since this is just a feasibility
 // example
 /**
