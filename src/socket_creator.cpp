@@ -44,7 +44,7 @@ void Socket::_listenToServer() {
       std::ostringstream ss;
       ss << buffer;
       std::string s = ss.str();
-      std::cout << "Message new: " << s << std::endl;
+      std::cout << "Server msg: " << s << std::endl;
 
       // Server sent peer's ip and port
       std::string delimiter{":"};
@@ -56,13 +56,10 @@ void Socket::_listenToServer() {
           s.erase(0, pos + delimiter.length());
         }
         _peerPort = stoi(s);
-        std::cout << "Peer ip: " << _peerIpAddress << std::endl;
-        std::cout << "Peer port: " << _peerPort << std::endl;
         break;
       }
     }
   } while (true);
-  std::cout << "Exiting this thing " << std::endl;
 
   // Notify so that connectToServer() can return
   std::lock_guard<std::mutex> lck(_mutex);
@@ -115,8 +112,6 @@ void Socket::_bindToPort() {
     std::cerr << "Can't bind to IP/Port";
     throw std::runtime_error("Can't bind to IP/Port");
   }
-
-  std::cout << "Could bind to port: " << _myPort << std::endl;
 }
 
 /**
@@ -160,7 +155,9 @@ void Socket::connectToServer() {
   // wait until other client has connected
   std::unique_lock<std::mutex> lck(_mutex);
   _cond.wait(lck);
-  std::cout << "Returning now..." << std::endl;
+
+  std::cout << "Retrieved peer info: " << _peerIpAddress << ":" << _peerPort
+            << ". Ready to connect to peer" << std::endl;
 }
 
 /**
