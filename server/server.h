@@ -15,45 +15,49 @@ Server class definition
 #include <map>
 #include <set>
 
-class TestServer; 
+namespace turbobeep {
+namespace mediator {
+
+class TestServer;
 
 // Used to keep track of connecting peer info as well as peer to connect to
 struct peerInfo {
   std::string name;
   std::string ipAddress;
   uint16_t port;
-}; 
+};
 
 struct userInfo {
   bool isClient;
-  bool canConnect{false};   
+  bool canConnect{false};
   std::string name;
   std::string ipAddress;
   uint16_t port;
-  struct peerInfo peerInfo; 
+  struct peerInfo peerInfo;
   int socket;
 };
 
 // Server class declaration
 class Server {
 public:
-  Server(std::uint16_t port=54700);
+  Server(std::uint16_t port = 54700);
   ~Server();
   int initServer();
   void runServer();
 
 private:
-  void _updatePeerInfo(std::string const &user, std::string const &peer); 
+  void _updatePeerInfo(std::string const &user, std::string const &peer);
   void _findPeer(std::string const &user, std::string const &peer);
   void _removePeer(int const &socket);
   void _readyToP2P(int const &socket);
   void _findPeerInformation(std::string &buffer, int sock);
   int _listening;
   fd_set _master;
-  std::map<std::string, userInfo> _userDescriptor; 
-  std::uint16_t _serverPort; 
+  std::map<std::string, userInfo> _userDescriptor;
+  std::uint16_t _serverPort;
 
-  friend TestServer; 
+  friend mediator::TestServer;
 };
-
+} // namespace mediator
+} // namespace turbobeep
 #endif

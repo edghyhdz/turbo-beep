@@ -1,7 +1,9 @@
 
 #include "server.h"
 
+using namespace turbobeep; 
+
 int main(){
-    Server server = Server(); 
+    mediator::Server server = mediator::Server(); 
     server.runServer(); 
 }

@@ -19,14 +19,16 @@
  * Server class member definitions
  */
 
-Server::Server(std::uint16_t port) : _serverPort(port) { this->initServer(); }
+using namespace turbobeep; 
 
-Server::~Server() {
+mediator::Server::Server(std::uint16_t port) : _serverPort(port) { this->initServer(); }
+
+mediator::Server::~Server() {
   FD_CLR(_listening, &_master);
   close(_listening);
 }
 
-int Server::initServer() {
+int mediator::Server::initServer() {
   this->_listening = socket(AF_INET, SOCK_STREAM, 0);
   int value{1};
   if (_listening == -1) {
@@ -60,7 +62,7 @@ int Server::initServer() {
  * @param[in, out] user current users' name
  * @param[in] peer Client's peer to connect to
  */
-void Server::_updatePeerInfo(std::string const &user, std::string const &peer){
+void mediator::Server::_updatePeerInfo(std::string const &user, std::string const &peer){
   _userDescriptor.at(user).canConnect = true;
   _userDescriptor.at(user).peerInfo.ipAddress = _userDescriptor.at(peer).ipAddress;
   _userDescriptor.at(user).peerInfo.port = _userDescriptor.at(peer).port;;
@@ -75,7 +77,7 @@ void Server::_updatePeerInfo(std::string const &user, std::string const &peer){
  * @param[in, out] user current users' name
  * @param[in] peer Client's peer to connect to
  */
-void Server::_findPeer(std::string const &user, std::string const &peer) {
+void mediator::Server::_findPeer(std::string const &user, std::string const &peer) {
   if (_userDescriptor.find(peer) == _userDescriptor.end()) {
     _userDescriptor.at(user).isClient = true;
   } else {
@@ -91,7 +93,7 @@ void Server::_findPeer(std::string const &user, std::string const &peer) {
  *
  * @param[in] socket disconnected user's socket
  */
-void Server::_removePeer(int const &socket) {
+void mediator::Server::_removePeer(int const &socket) {
   for (auto key_val : _userDescriptor) {
     if (socket == key_val.second.socket) {
       _userDescriptor.erase(key_val.second.name);
@@ -106,7 +108,7 @@ void Server::_removePeer(int const &socket) {
  *
  * @param[in] socket disconnected user's socket
  */
-void Server::_readyToP2P(int const &socket) {
+void mediator::Server::_readyToP2P(int const &socket) {
 
   for (auto key_val : _userDescriptor) {
     if (socket == key_val.second.socket) {
@@ -133,7 +135,7 @@ void Server::_readyToP2P(int const &socket) {
   }
 }
 
-void Server::_findPeerInformation(std::string &buffer, int sock){
+void mediator::Server::_findPeerInformation(std::string &buffer, int sock){
   std::string delimiter = "::";
 
   if (buffer.find(delimiter) != std::string::npos) {
@@ -161,7 +163,7 @@ void Server::_findPeerInformation(std::string &buffer, int sock){
   }
 }
 
-void Server::runServer() {
+void mediator::Server::runServer() {
   while (true) {
     // copies all
     auto copy = _master;
