@@ -1,7 +1,6 @@
 #ifndef SERVER_TEST
 #define SERVER_TEST
 #include "server.h"
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 using namespace turbobeep; 
