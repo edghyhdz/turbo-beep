@@ -1,4 +1,5 @@
 #include "socket_creator.h"
+#include "messages.h"
 #include <iostream>
 #include <socket/socket_utils.h>
 #include <string.h>
@@ -12,7 +13,7 @@ p2p::Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
     : _connectionOpen(false), _peerName(peerName) {
 
   _myInfo.userName = userName; 
-  
+
   // Get own ip address
   _setIpAddress();
   std::cout << ipAddress << ":" << portNum << std::endl;
@@ -142,9 +143,34 @@ void p2p::Socket::_connectToServer() {
                         "::" + userName() + "::" + _peerName;
 
   // Upon connection, send my IP address to the server
+  // TODO: Remove this once server implementation is done @Edgar
   send(_sockFD, message.c_str(), message.length() + 1, 0);
 
   _connectionOpen = true;
+}
+
+/**
+ * Description here...
+ */
+void p2p::Socket::_sendMessage(){
+
+  int size; 
+  payload::packet packet; 
+
+  // Add information to the packet
+  messages::PeerInfo::addPeerInfo(&size, &packet, myInfo());
+  std::cout << "Size: " << size << std::endl;
+
+  char *pkt = new char[size];
+  array_output_stream aos(pkt, size);
+  output_stream *coded_output =
+      new google::protobuf::io::CodedOutputStream(&aos);
+
+  // Serialize the message
+  messages::PeerInfo::serializeMessage(coded_output, packet); 
+
+  // Send serialized packet
+  send(_sockFD, (void *)pkt, coded_output->ByteCount(), 0);
 }
 
 /**
@@ -155,6 +181,9 @@ void p2p::Socket::_connectToServer() {
  */
 void p2p::Socket::connectToServer() {
   _connectToServer();
+
+  // After connecting to the server, send message
+  _sendMessage(); 
 
   // wait until other client has connected
   std::unique_lock<std::mutex> lck(_mutex);
