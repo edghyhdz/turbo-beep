@@ -21,6 +21,13 @@ typedef google::protobuf::io::ArrayOutputStream array_output_stream;
 
 namespace turbobeep {
 namespace p2p {
+
+struct myInfo {
+  std::string myIpAddress; 
+  std::uint16_t myPort; 
+  std::string userName; 
+}; 
+
 class Socket {
 public:
   Socket(char *&ipAddress, char *&portNum, std::string userName,
@@ -28,12 +35,11 @@ public:
   ~Socket();
   void connectToServer();
   void connectToPeer();
-  void peerInfoToPayload(int *size, payload::packet *packet);
-  void serializeMessage(output_stream *coded_output, payload::packet &packet);
   void close();
-  std::string ipAddress() const { return _myIpAddress; }
-  std::uint16_t port() const { return _myPort; }
-  std::string userName() const { return _userName; }
+  p2p::myInfo myInfo() const & { return _myInfo; }
+  std::string ipAddress() const { return _myInfo.myIpAddress; }
+  std::uint16_t port() const { return _myInfo.myPort; }
+  std::string userName() const { return _myInfo.userName; }
 
 private:
   addrinfo _hints, *_p;
@@ -44,12 +50,11 @@ private:
   void _connectToServer();
   void _listenToServer();
 
-  std::string _userName;
+  p2p::myInfo _myInfo; 
+
   int _sockFD;
   int _connFD;
   int _addrInfo;
-  std::string _myIpAddress;
-  std::uint16_t _myPort;
   bool _connectionOpen;
   std::thread _t;
   std::string _peerName;
