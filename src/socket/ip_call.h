@@ -5,6 +5,7 @@
 #include <curl/curl.h>
 #include <string>
 
+namespace turbobeep {
 namespace socket_utils {
 
 /**
@@ -37,5 +38,6 @@ inline void getIpAddress(long *httpCode, std::string *readBuffer) {
 }
 
 } // namespace socket_utils
+} // namespace turbobeep
 
 #endif

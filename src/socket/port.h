@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+namespace turbobeep {
 namespace socket_utils {
 
 /**
@@ -67,4 +68,6 @@ inline void getAvailablePort(std::uint16_t *port) {
   }
 }
 } // namespace socket_utils
+} // namespace turbobeep
+
 #endif
