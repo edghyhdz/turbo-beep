@@ -16,13 +16,13 @@ P2PMessage::P2PMessage() {
   std::string theirUserName{"peerTwo"};
 
   _socket = new p2p::Socket(_ipAddress, _port, userName, theirUserName);
-
 }
 
 P2PMessage::~P2PMessage() {}
 
 void P2PMessage::SetUp() {
-  _socket->peerInfoToPayload(&_size, &_packet);
+  // _socket->peerInfoToPayload(&_size, &_packet);
+  messages::PeerInfo::addPeerInfo(&_size, &_packet, _socket->myInfo());
 }
 
 void P2PMessage::TearDown() {
@@ -44,9 +44,10 @@ TEST_F(P2PMessage, BufferByteSizeTest) {
 
   // Get the bytecount to compare with that returned by serializeMessage()
   auto *payload = tempPacket.mutable_payload();
-  auto *peerInfo = payload->mutable_peerinfo(); 
+  auto *peerInfo = payload->mutable_peerinfo();
+  
   payload->set_type(tempPacket.PEER_INFO);
-  peerInfo->set_port(_socket->port()); 
+  peerInfo->set_port(_socket->port());
   peerInfo->set_ipaddress(_socket->ipAddress());
   peerInfo->set_username(_socket->userName());
   const auto timeStamp = std::chrono::system_clock::now();
@@ -61,19 +62,21 @@ TEST_F(P2PMessage, BufferByteSizeTest) {
 }
 
 TEST_F(P2PMessage, ProtobufferSerializationTestNoThrow) {
-  char *pkt = new char[_size]; 
-  array_output_stream aos(pkt, _size); 
-  output_stream *coded_output = new google::protobuf::io::CodedOutputStream(&aos); 
+  char *pkt = new char[_size];
+  array_output_stream aos(pkt, _size);
+  output_stream *coded_output =
+      new google::protobuf::io::CodedOutputStream(&aos);
 
   // Should serialize the message correctly
-  ASSERT_NO_THROW(_socket->serializeMessage(coded_output, _packet)); 
+  ASSERT_NO_THROW((void)messages::PeerInfo::serializeMessage(coded_output, _packet));
+  // ASSERT_NO_THROW(_socket->serializeMessage(coded_output, _packet));
   std::cout << "Coded output " << coded_output->ByteCount() << std::endl;
 
   // Remove overhead from protobuffer and add overhead to store data
-  ASSERT_EQ(coded_output->ByteCount(), _size - 4 + 1); 
+  ASSERT_EQ(coded_output->ByteCount(), _size - 4 + 1);
 
-  std::cout << "Send message and free up them memory" << std::endl; 
+  std::cout << "Send message and free up them memory" << std::endl;
   delete[] pkt;
-  delete coded_output; 
+  delete coded_output;
   google::protobuf::ShutdownProtobufLibrary();
 }
