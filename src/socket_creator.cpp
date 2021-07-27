@@ -4,8 +4,10 @@
 #include <string.h>
 #include <sys/socket.h>
 
+using namespace turbobeep;
+
 // Connect to the server upon socket creation
-Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
+p2p::Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
                std::string peerName)
     : _connectionOpen(false), _userName(userName), _peerName(peerName) {
 
@@ -21,7 +23,7 @@ Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
 }
 
 // Destructor
-Socket::~Socket() { _t.join(); }
+p2p::Socket::~Socket() { _t.join(); }
 
 /**
  * Add peer information, _myPort, myIpAddress, myName, timestamp and message
@@ -30,7 +32,7 @@ Socket::~Socket() { _t.join(); }
  * @param[in, out] size size of the serialized payload to send
  * @param[in, out] packet packet object
  */
-void Socket::peerInfoToPayload(int *size, payload::packet *packet) {
+void p2p::Socket::peerInfoToPayload(int *size, payload::packet *packet) {
 
   auto *payload = packet->mutable_payload();
   auto *peerInfo = payload->mutable_peerinfo(); 
@@ -56,7 +58,7 @@ void Socket::peerInfoToPayload(int *size, payload::packet *packet) {
  * @param[in, out] coded_output serialized object to send to peer
  * @param[in] packet packet object needed to serialize coded_output
  */
-void Socket::serializeMessage(output_stream *coded_output,
+void p2p::Socket::serializeMessage(output_stream *coded_output,
                               payload::packet &packet) {
 
   coded_output->WriteVarint32(packet.ByteSize()); 
@@ -69,7 +71,7 @@ void Socket::serializeMessage(output_stream *coded_output,
  * Listens to server, started on a thread.
  * Waits for instructions from the server, related to info of peer to connect to
  */
-void Socket::_listenToServer() {
+void p2p::Socket::_listenToServer() {
   int res;
   char buffer[128];
 
@@ -115,7 +117,7 @@ void Socket::_listenToServer() {
  * @param[out] readBuffer the response ip address from http request
  * @ref [socket_utils::getIpAddress]
  */
-void Socket::_setIpAddress() {
+void p2p::Socket::_setIpAddress() {
   long httpCode;
   socket_utils::getIpAddress(&httpCode, &_myIpAddress);
 
@@ -130,14 +132,14 @@ void Socket::_setIpAddress() {
  *
  * @param _myPort private member to be passed as reference to getAvailablePort
  */
-void Socket::_setPort() { socket_utils::getAvailablePort(&_myPort); }
+void p2p::Socket::_setPort() { socket_utils::getAvailablePort(&_myPort); }
 
 /**
  * Binds to port that will be sent to the mediator and later from the mediator
  * the the peer. It uses `_setPort()` to get an available port and assign it to
  * `_myPort`
  */
-void Socket::_bindToPort() {
+void p2p::Socket::_bindToPort() {
   // Get available port
   _setPort();
   unsigned int value = 1;
@@ -157,7 +159,7 @@ void Socket::_bindToPort() {
 /**
  * Connects to server as given by the args `ipAddress` and `portNum`
  */
-void Socket::_connectToServer() {
+void p2p::Socket::_connectToServer() {
 
   unsigned int value = 1;
   this->_sockFD = socket(_p->ai_family, _p->ai_socktype, _p->ai_protocol);
@@ -189,7 +191,7 @@ void Socket::_connectToServer() {
  * and ip address. 
  * After that this method will return
  */
-void Socket::connectToServer() {
+void p2p::Socket::connectToServer() {
   _connectToServer();
 
   // wait until other client has connected
@@ -206,7 +208,7 @@ void Socket::connectToServer() {
  * @param peerPort - Peer's port to connect to
  * @param peerIp - Peer's ip address to connect to
  */
-void Socket::connectToPeer() {
+void p2p::Socket::connectToPeer() {
   char buffer[128];
   char bufferSend[128];
 
