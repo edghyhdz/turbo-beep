@@ -5,7 +5,7 @@ project(tests)
 find_package(GTest REQUIRED)
 find_package(CURL)
 find_package(Protobuf REQUIRED)
-set(GMOCK_LIBRARIES /usr/lib/libgmock.a /usr/lib/libgmock_main.a)
+# set(GMOCK_LIBRARIES /usr/lib/libgmock.a /usr/lib/libgmock_main.a)
 
 
 add_executable(tests 
