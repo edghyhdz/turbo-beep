@@ -8,10 +8,12 @@ find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 
 add_executable(p2p
+    include/messages.h
     include/socket_creator.h
     protos/payload.pb.h
     protos/payload.pb.cc
     protos/payload.proto
+    src/messages.cpp
     src/socket_creator.cpp
     src/socket/socket_utils.h
     src/socket/socket_utils.h
