@@ -5,7 +5,7 @@ run on linux and work with Ncurses link to repo:
 https://bitbucket.org/sloankelly/youtube-source-repository/src/master/cpp/networking/MultipleClientsBarebonesServer/MultipleClientsBarebonesServer/
 
 -----------------------
-Server class definition
+Server class declarations
 */
 
 #ifndef SERVER_MULT

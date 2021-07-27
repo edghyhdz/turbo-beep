@@ -1,6 +1,3 @@
-/**
- * Server class declaration
- */
 #include "server.h"
 #include <arpa/inet.h>
 #include <iostream>
