@@ -1,6 +1,5 @@
 #include "tests.h"
 #include <chrono>
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
 #include <thread>

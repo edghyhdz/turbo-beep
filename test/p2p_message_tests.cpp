@@ -1,6 +1,5 @@
 #include "tests.h"
 #include <chrono>
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
 #include <thread>
@@ -45,7 +44,7 @@ TEST_F(P2PMessage, BufferByteSizeTest) {
   // Get the bytecount to compare with that returned by serializeMessage()
   auto *payload = tempPacket.mutable_payload();
   auto *peerInfo = payload->mutable_peerinfo();
-  
+
   payload->set_type(tempPacket.PEER_INFO);
   peerInfo->set_port(_socket->port());
   peerInfo->set_ipaddress(_socket->ipAddress());
