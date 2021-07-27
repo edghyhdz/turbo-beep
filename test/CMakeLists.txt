@@ -14,8 +14,10 @@ add_executable(tests
     ../src/socket/ip_call.h
     ../src/socket/port.h
     ../src/socket/socket_utils.h
+    ../include/messages.h
     ../include/socket_creator.h
     ../src/socket_creator.cpp
+    ../src/messages.cpp
     ../protos/payload.pb.h
     ../protos/payload.pb.cc
     ../protos/payload.proto
