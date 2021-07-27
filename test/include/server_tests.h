@@ -4,7 +4,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-class TestServer : public Server {
+using namespace turbobeep; 
+
+class mediator::TestServer : public mediator::Server {
 public:
   // Made them public to test
   void findPeerInfo(std::string &buffer, int sock) {
@@ -26,7 +28,7 @@ public:
   static void TearDownTestCase(){};
 
 protected:
-  TestServer server;
+  mediator::TestServer server;
 };
 
 #endif

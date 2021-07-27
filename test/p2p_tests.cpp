@@ -7,7 +7,7 @@
 
 P2PFixture::P2PFixture() {
   std::uint16_t serverPort{54002};
-  _server = std::make_shared<Server>(serverPort);
+  _server = std::make_shared<mediator::Server>(serverPort);
 }
 
 P2PFixture::~P2PFixture() {}
@@ -22,8 +22,8 @@ void P2PFixture::SetUp() {
   std::string userName{"peerOne"};
   std::string theirUserName{"peerTwo"};
 
-  this->_socket = new Socket(_ipAddress, _port, userName, theirUserName);
-  this->_peerTwo = new Socket(_ipAddress, _port, theirUserName, userName);
+  this->_socket = new p2p::Socket(_ipAddress, _port, userName, theirUserName);
+  this->_peerTwo = new p2p::Socket(_ipAddress, _port, theirUserName, userName);
 }
 
 void P2PFixture::TearDown() {
@@ -60,8 +60,8 @@ int P2PFixture::peerWrapper() {
 
 TEST_F(P2PFixture, SuccessfulDiscconectFromServerAferBothPeersOnline) {
 
-  _tServer = std::thread(&Server::runServer, _server);
-  _tPeer = std::thread(&Socket::connectToServer, _socket);
+  _tServer = std::thread(&mediator::Server::runServer, _server);
+  _tPeer = std::thread(&p2p::Socket::connectToServer, _socket);
   int retval = this->peerWrapper();
 
   // If both clients connected to the server successfully

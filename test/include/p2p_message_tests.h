@@ -5,6 +5,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using namespace turbobeep; 
+
 class P2PMessage : public testing::Test {
 public:
   P2PMessage();
@@ -15,7 +17,7 @@ public:
   static void TearDownTestCase(){};
 
 protected:
-  Socket *_socket;
+  p2p::Socket *_socket;
   int _size; 
   payload::packet _packet;
   char *_ipAddress;

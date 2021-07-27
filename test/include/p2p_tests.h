@@ -5,6 +5,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using namespace turbobeep; 
+
 class P2PFixture : public testing::Test {
 public:
   P2PFixture();
@@ -16,9 +18,9 @@ public:
   int peerWrapper();
 
 protected:
-  Socket *_socket;
-  Socket *_peerTwo;
-  std::shared_ptr<Server> _server;
+  p2p::Socket *_socket;
+  p2p::Socket *_peerTwo;
+  std::shared_ptr<mediator::Server> _server;
 
   char *_ipAddress;
   char *_port;

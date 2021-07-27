@@ -15,7 +15,7 @@ P2PMessage::P2PMessage() {
   std::string userName{"peerOne"};
   std::string theirUserName{"peerTwo"};
 
-  _socket = new Socket(_ipAddress, _port, userName, theirUserName);
+  _socket = new p2p::Socket(_ipAddress, _port, userName, theirUserName);
 
 }
 
