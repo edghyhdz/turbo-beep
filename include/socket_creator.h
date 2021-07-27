@@ -16,9 +16,11 @@
 #include <thread>
 #include <unistd.h>
 
-typedef google::protobuf::io::CodedOutputStream output_stream; 
-typedef google::protobuf::io::ArrayOutputStream array_output_stream; 
+typedef google::protobuf::io::CodedOutputStream output_stream;
+typedef google::protobuf::io::ArrayOutputStream array_output_stream;
 
+namespace turbobeep {
+namespace p2p {
 class Socket {
 public:
   Socket(char *&ipAddress, char *&portNum, std::string userName,
@@ -31,7 +33,7 @@ public:
   void close();
   std::string ipAddress() const { return _myIpAddress; }
   std::uint16_t port() const { return _myPort; }
-  std::string userName() const {return _userName; }
+  std::string userName() const { return _userName; }
 
 private:
   addrinfo _hints, *_p;
@@ -54,7 +56,8 @@ private:
   std::uint16_t _peerPort;
   std::string _peerIpAddress;
   std::mutex _mutex;
-  std::condition_variable _cond; 
+  std::condition_variable _cond;
 };
-
+} // namespace p2p
+} // namespace turbobeep
 #endif
