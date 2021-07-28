@@ -279,6 +279,18 @@ class packet_PeerInfo : public ::google::protobuf::Message /* @@protoc_insertion
   ::std::string* release_username();
   void set_allocated_username(::std::string* username);
 
+  // required string peerName = 4;
+  bool has_peername() const;
+  void clear_peername();
+  static const int kPeerNameFieldNumber = 4;
+  const ::std::string& peername() const;
+  void set_peername(const ::std::string& value);
+  void set_peername(const char* value);
+  void set_peername(const char* value, size_t size);
+  ::std::string* mutable_peername();
+  ::std::string* release_peername();
+  void set_allocated_peername(::std::string* peername);
+
   // @@protoc_insertion_point(class_scope:payload.packet.PeerInfo)
  private:
   inline void set_has_ipaddress();
@@ -287,6 +299,8 @@ class packet_PeerInfo : public ::google::protobuf::Message /* @@protoc_insertion
   inline void clear_has_port();
   inline void set_has_username();
   inline void clear_has_username();
+  inline void set_has_peername();
+  inline void clear_has_peername();
 
   // helper for ByteSize()
   int RequiredFieldsByteSizeFallback() const;
@@ -296,6 +310,7 @@ class packet_PeerInfo : public ::google::protobuf::Message /* @@protoc_insertion
   mutable int _cached_size_;
   ::google::protobuf::internal::ArenaStringPtr ipaddress_;
   ::google::protobuf::internal::ArenaStringPtr username_;
+  ::google::protobuf::internal::ArenaStringPtr peername_;
   ::google::protobuf::uint32 port_;
   friend void  protobuf_AddDesc_payload_2eproto();
   friend void protobuf_AssignDesc_payload_2eproto();
@@ -843,6 +858,60 @@ inline void packet_PeerInfo::set_allocated_username(::std::string* username) {
   }
   username_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), username);
   // @@protoc_insertion_point(field_set_allocated:payload.packet.PeerInfo.userName)
+}
+
+// required string peerName = 4;
+inline bool packet_PeerInfo::has_peername() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void packet_PeerInfo::set_has_peername() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void packet_PeerInfo::clear_has_peername() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void packet_PeerInfo::clear_peername() {
+  peername_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  clear_has_peername();
+}
+inline const ::std::string& packet_PeerInfo::peername() const {
+  // @@protoc_insertion_point(field_get:payload.packet.PeerInfo.peerName)
+  return peername_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void packet_PeerInfo::set_peername(const ::std::string& value) {
+  set_has_peername();
+  peername_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:payload.packet.PeerInfo.peerName)
+}
+inline void packet_PeerInfo::set_peername(const char* value) {
+  set_has_peername();
+  peername_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:payload.packet.PeerInfo.peerName)
+}
+inline void packet_PeerInfo::set_peername(const char* value, size_t size) {
+  set_has_peername();
+  peername_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:payload.packet.PeerInfo.peerName)
+}
+inline ::std::string* packet_PeerInfo::mutable_peername() {
+  set_has_peername();
+  // @@protoc_insertion_point(field_mutable:payload.packet.PeerInfo.peerName)
+  return peername_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* packet_PeerInfo::release_peername() {
+  // @@protoc_insertion_point(field_release:payload.packet.PeerInfo.peerName)
+  clear_has_peername();
+  return peername_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void packet_PeerInfo::set_allocated_peername(::std::string* peername) {
+  if (peername != NULL) {
+    set_has_peername();
+  } else {
+    clear_has_peername();
+  }
+  peername_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), peername);
+  // @@protoc_insertion_point(field_set_allocated:payload.packet.PeerInfo.peerName)
 }
 
 // -------------------------------------------------------------------

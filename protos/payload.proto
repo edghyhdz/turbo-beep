@@ -20,6 +20,7 @@ message packet {
       required string ipAddress = 1; 
       required uint32 port = 2; 
       required string userName = 3; 
+      required string peerName = 4; 
   }
 
   message Crypto {

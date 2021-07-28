@@ -79,10 +79,11 @@ void protobuf_AssignDesc_payload_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(packet_Payload, _internal_metadata_),
       -1);
   packet_PeerInfo_descriptor_ = packet_descriptor_->nested_type(1);
-  static const int packet_PeerInfo_offsets_[3] = {
+  static const int packet_PeerInfo_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(packet_PeerInfo, ipaddress_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(packet_PeerInfo, port_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(packet_PeerInfo, username_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(packet_PeerInfo, peername_),
   };
   packet_PeerInfo_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
@@ -158,18 +159,18 @@ void protobuf_AddDesc_payload_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\rpayload.proto\022\007payload\"\254\003\n\006packet\022\022\n\nt"
+    "\n\rpayload.proto\022\007payload\"\276\003\n\006packet\022\022\n\nt"
     "ime_stamp\030\001 \002(\006\022(\n\007payload\030\002 \002(\0132\027.paylo"
     "ad.packet.Payload\032\224\001\n\007Payload\0225\n\004type\030\001 "
     "\002(\0162\034.payload.packet.MessageTypes:\tPEER_"
     "INFO\022*\n\010peerInfo\030\002 \001(\0132\030.payload.packet."
     "PeerInfo\022&\n\006crypto\030\003 \001(\0132\026.payload.packe"
-    "t.Crypto\032=\n\010PeerInfo\022\021\n\tipAddress\030\001 \002(\t\022"
-    "\014\n\004port\030\002 \002(\r\022\020\n\010userName\030\003 \002(\t\032`\n\006Crypt"
-    "o\022\021\n\tclientKey\030\001 \002(\t\022\021\n\thashedKey\030\002 \002(\014\022"
-    "\032\n\022encryptedHashedKey\030\003 \002(\014\022\024\n\014encrypted"
-    "Msg\030\004 \002(\014\",\n\014MessageTypes\022\r\n\tPEER_INFO\020\000"
-    "\022\r\n\tADVERTISE\020\001", 455);
+    "t.Crypto\032O\n\010PeerInfo\022\021\n\tipAddress\030\001 \002(\t\022"
+    "\014\n\004port\030\002 \002(\r\022\020\n\010userName\030\003 \002(\t\022\020\n\010peerN"
+    "ame\030\004 \002(\t\032`\n\006Crypto\022\021\n\tclientKey\030\001 \002(\t\022\021"
+    "\n\thashedKey\030\002 \002(\014\022\032\n\022encryptedHashedKey\030"
+    "\003 \002(\014\022\024\n\014encryptedMsg\030\004 \002(\014\",\n\014MessageTy"
+    "pes\022\r\n\tPEER_INFO\020\000\022\r\n\tADVERTISE\020\001", 473);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "payload.proto", &protobuf_RegisterTypes);
   packet::default_instance_ = new packet();
@@ -564,6 +565,7 @@ void packet_Payload::InternalSwap(packet_Payload* other) {
 const int packet_PeerInfo::kIpAddressFieldNumber;
 const int packet_PeerInfo::kPortFieldNumber;
 const int packet_PeerInfo::kUserNameFieldNumber;
+const int packet_PeerInfo::kPeerNameFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 packet_PeerInfo::packet_PeerInfo()
@@ -589,6 +591,7 @@ void packet_PeerInfo::SharedCtor() {
   ipaddress_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   port_ = 0u;
   username_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  peername_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -600,6 +603,7 @@ packet_PeerInfo::~packet_PeerInfo() {
 void packet_PeerInfo::SharedDtor() {
   ipaddress_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   username_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  peername_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
   }
 }
@@ -631,13 +635,16 @@ packet_PeerInfo* packet_PeerInfo::New(::google::protobuf::Arena* arena) const {
 
 void packet_PeerInfo::Clear() {
 // @@protoc_insertion_point(message_clear_start:payload.packet.PeerInfo)
-  if (_has_bits_[0 / 32] & 7u) {
+  if (_has_bits_[0 / 32] & 15u) {
     if (has_ipaddress()) {
       ipaddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     }
     port_ = 0u;
     if (has_username()) {
       username_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    }
+    if (has_peername()) {
+      peername_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -700,6 +707,23 @@ bool packet_PeerInfo::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(34)) goto parse_peerName;
+        break;
+      }
+
+      // required string peerName = 4;
+      case 4: {
+        if (tag == 34) {
+         parse_peerName:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_peername()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->peername().data(), this->peername().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "payload.packet.PeerInfo.peerName");
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -754,6 +778,16 @@ void packet_PeerInfo::SerializeWithCachedSizes(
       3, this->username(), output);
   }
 
+  // required string peerName = 4;
+  if (has_peername()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->peername().data(), this->peername().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "payload.packet.PeerInfo.peerName");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      4, this->peername(), output);
+  }
+
   if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -791,6 +825,17 @@ void packet_PeerInfo::SerializeWithCachedSizes(
         3, this->username(), target);
   }
 
+  // required string peerName = 4;
+  if (has_peername()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->peername().data(), this->peername().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "payload.packet.PeerInfo.peerName");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        4, this->peername(), target);
+  }
+
   if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -824,13 +869,20 @@ int packet_PeerInfo::RequiredFieldsByteSizeFallback() const {
         this->username());
   }
 
+  if (has_peername()) {
+    // required string peerName = 4;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->peername());
+  }
+
   return total_size;
 }
 int packet_PeerInfo::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:payload.packet.PeerInfo)
   int total_size = 0;
 
-  if (((_has_bits_[0] & 0x00000007) ^ 0x00000007) == 0) {  // All required fields are present.
+  if (((_has_bits_[0] & 0x0000000f) ^ 0x0000000f) == 0) {  // All required fields are present.
     // required string ipAddress = 1;
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -845,6 +897,11 @@ int packet_PeerInfo::ByteSize() const {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->username());
+
+    // required string peerName = 4;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->peername());
 
   } else {
     total_size += RequiredFieldsByteSizeFallback();
@@ -894,6 +951,10 @@ void packet_PeerInfo::MergeFrom(const packet_PeerInfo& from) {
       set_has_username();
       username_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.username_);
     }
+    if (from.has_peername()) {
+      set_has_peername();
+      peername_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.peername_);
+    }
   }
   if (from._internal_metadata_.have_unknown_fields()) {
     mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -915,7 +976,7 @@ void packet_PeerInfo::CopyFrom(const packet_PeerInfo& from) {
 }
 
 bool packet_PeerInfo::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
+  if ((_has_bits_[0] & 0x0000000f) != 0x0000000f) return false;
 
   return true;
 }
@@ -928,6 +989,7 @@ void packet_PeerInfo::InternalSwap(packet_PeerInfo* other) {
   ipaddress_.Swap(&other->ipaddress_);
   std::swap(port_, other->port_);
   username_.Swap(&other->username_);
+  peername_.Swap(&other->peername_);
   std::swap(_has_bits_[0], other->_has_bits_[0]);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -1926,6 +1988,60 @@ void packet_PeerInfo::clear_username() {
   }
   username_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), username);
   // @@protoc_insertion_point(field_set_allocated:payload.packet.PeerInfo.userName)
+}
+
+// required string peerName = 4;
+bool packet_PeerInfo::has_peername() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+void packet_PeerInfo::set_has_peername() {
+  _has_bits_[0] |= 0x00000008u;
+}
+void packet_PeerInfo::clear_has_peername() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+void packet_PeerInfo::clear_peername() {
+  peername_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  clear_has_peername();
+}
+ const ::std::string& packet_PeerInfo::peername() const {
+  // @@protoc_insertion_point(field_get:payload.packet.PeerInfo.peerName)
+  return peername_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void packet_PeerInfo::set_peername(const ::std::string& value) {
+  set_has_peername();
+  peername_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:payload.packet.PeerInfo.peerName)
+}
+ void packet_PeerInfo::set_peername(const char* value) {
+  set_has_peername();
+  peername_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:payload.packet.PeerInfo.peerName)
+}
+ void packet_PeerInfo::set_peername(const char* value, size_t size) {
+  set_has_peername();
+  peername_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:payload.packet.PeerInfo.peerName)
+}
+ ::std::string* packet_PeerInfo::mutable_peername() {
+  set_has_peername();
+  // @@protoc_insertion_point(field_mutable:payload.packet.PeerInfo.peerName)
+  return peername_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* packet_PeerInfo::release_peername() {
+  // @@protoc_insertion_point(field_release:payload.packet.PeerInfo.peerName)
+  clear_has_peername();
+  return peername_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void packet_PeerInfo::set_allocated_peername(::std::string* peername) {
+  if (peername != NULL) {
+    set_has_peername();
+  } else {
+    clear_has_peername();
+  }
+  peername_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), peername);
+  // @@protoc_insertion_point(field_set_allocated:payload.packet.PeerInfo.peerName)
 }
 
 // -------------------------------------------------------------------
