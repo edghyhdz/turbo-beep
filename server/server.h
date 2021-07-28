@@ -11,9 +11,9 @@ Server class declarations
 #ifndef SERVER_MULT
 #define SERVER_MULT
 #define PORT_SERVER 54700
-
 #include <map>
 #include <set>
+#include "messages_receive.h"
 
 namespace turbobeep {
 namespace mediator {
@@ -44,17 +44,20 @@ public:
   ~Server();
   int initServer();
   void runServer();
+  void readBody(int sock, uint32g size,payload::packet *packet); 
 
 private:
   void _updatePeerInfo(std::string const &user, std::string const &peer);
   void _findPeer(std::string const &user, std::string const &peer);
   void _removePeer(int const &socket);
   void _readyToP2P(int const &socket);
-  void _findPeerInformation(std::string &buffer, int sock);
+  void _findPeerInformation(payload::packet_PeerInfo& peerInfo, int sock);
+
   int _listening;
   fd_set _master;
   std::map<std::string, userInfo> _userDescriptor;
   std::uint16_t _serverPort;
+  std::unique_ptr<messages::Receive> _recvHandle; 
 
   friend mediator::TestServer;
 };
