@@ -26,6 +26,7 @@ struct myInfo {
   std::string myIpAddress; 
   std::uint16_t myPort; 
   std::string userName; 
+  std::string peerName; 
 }; 
 
 class Socket {
@@ -40,6 +41,7 @@ public:
   std::string ipAddress() const { return _myInfo.myIpAddress; }
   std::uint16_t port() const { return _myInfo.myPort; }
   std::string userName() const { return _myInfo.userName; }
+  std::string peerName() const { return _myInfo.peerName; }
 
 private:
   addrinfo _hints, *_p;
