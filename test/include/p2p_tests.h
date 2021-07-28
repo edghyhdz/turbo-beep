@@ -17,8 +17,8 @@ public:
   int peerWrapper();
 
 protected:
-  p2p::Socket *_socket;
-  p2p::Socket *_peerTwo;
+  std::shared_ptr<p2p::Socket> _peerOne; 
+  std::shared_ptr<p2p::Socket> _peerTwo; 
   std::shared_ptr<mediator::Server> _server;
 
   char *_ipAddress;
