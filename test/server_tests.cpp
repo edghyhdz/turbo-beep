@@ -3,15 +3,40 @@
 #include <memory>
 #include <thread>
 
+// Helper function to add information to struct myInfo
+void setMyInfo(p2p::myInfo *myInfo, std::string &&ipAddress,
+               std::uint16_t &&port, std::string &&userName,
+               std::string &&peerName) {
+  myInfo->myIpAddress = ipAddress;
+  myInfo->myPort = port;
+  myInfo->userName = userName;
+  myInfo->peerName = peerName;
+}
+
 void ServerFixture::SetUp() {
+  int size; 
+  payload::packet packetFirstPeer, packetSecondPeer; 
   std::string buffer;
-  int sock{1};
+  p2p::myInfo firstPeer, secondPeer; 
 
-  buffer = "127.0.0.1::1234::FirstPeer::SecondPeer";
-  server.findPeerInfo(buffer, sock);
+  // Add both peer information to struct
+  setMyInfo(&firstPeer, "127.0.0.1", 1234, "FirstPeer", "SecondPeer");
+  setMyInfo(&secondPeer, "195.0.0.1", 4321, "SecondPeer", "FirstPeer");
 
-  buffer = "195.0.0.1::4321::SecondPeer::FirstPeer";
-  server.findPeerInfo(buffer, ++sock);
+  // Add user information to packet
+  messages::UserInfo::addUserInfo(&size, &packetFirstPeer, firstPeer);
+  messages::UserInfo::addUserInfo(&size, &packetSecondPeer, secondPeer);
+
+  // Get payload from peerinfo
+  auto * payloadP1 = packetFirstPeer.mutable_payload();
+  auto * peerInfoP1 = payloadP1->mutable_peerinfo(); 
+  auto * payloadP2 = packetSecondPeer.mutable_payload();
+  auto * peerInfoP2 = payloadP2->mutable_peerinfo();
+
+  // PeerInfo contains all information that normally is sent to the server by
+  // the peers
+  server.findPeerInfo(*peerInfoP1, 1);
+  server.findPeerInfo(*peerInfoP2, 2);
 }
 
 TEST_F(ServerFixture, findPeerInfo_FirstPeer) {
