@@ -14,9 +14,9 @@ typedef google::protobuf::io::ArrayOutputStream array_output_stream;
 namespace turbobeep {
 namespace messages {
 
-class PeerInfo {
+class UserInfo {
 public:
-  static void addPeerInfo(int *size, payload::packet *packet,
+  static void addUserInfo(int *size, payload::packet *packet,
                           p2p::myInfo const &myInfo);
   static void serializeMessage(output_stream *coded_output,
                                payload::packet &packet);
