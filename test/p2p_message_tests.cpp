@@ -20,8 +20,7 @@ P2PMessage::P2PMessage() {
 P2PMessage::~P2PMessage() {}
 
 void P2PMessage::SetUp() {
-  // _socket->peerInfoToPayload(&_size, &_packet);
-  messages::PeerInfo::addPeerInfo(&_size, &_packet, _socket->myInfo());
+  messages::UserInfo::addUserInfo(&_size, &_packet, _socket->myInfo());
 }
 
 void P2PMessage::TearDown() {
@@ -49,6 +48,7 @@ TEST_F(P2PMessage, BufferByteSizeTest) {
   peerInfo->set_port(_socket->port());
   peerInfo->set_ipaddress(_socket->ipAddress());
   peerInfo->set_username(_socket->userName());
+  peerInfo->set_peername(_socket->peerName());
   const auto timeStamp = std::chrono::system_clock::now();
   long tS = std::chrono::duration_cast<std::chrono::milliseconds>(
                 timeStamp.time_since_epoch())
@@ -67,9 +67,7 @@ TEST_F(P2PMessage, ProtobufferSerializationTestNoThrow) {
       new google::protobuf::io::CodedOutputStream(&aos);
 
   // Should serialize the message correctly
-  ASSERT_NO_THROW((void)messages::PeerInfo::serializeMessage(coded_output, _packet));
-  // ASSERT_NO_THROW(_socket->serializeMessage(coded_output, _packet));
-  std::cout << "Coded output " << coded_output->ByteCount() << std::endl;
+  ASSERT_NO_THROW((void)messages::UserInfo::serializeMessage(coded_output, _packet));
 
   // Remove overhead from protobuffer and add overhead to store data
   ASSERT_EQ(coded_output->ByteCount(), _size - 4 + 1);
