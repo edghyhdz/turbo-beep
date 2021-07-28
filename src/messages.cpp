@@ -11,7 +11,7 @@ using namespace turbobeep;
  * @param[in] packet packet object needed to serialize coded_output
  * @param[in] myInfo struct containing user information (port, ip, name)
  */
-void messages::PeerInfo::addPeerInfo(int *size, payload::packet *packet,
+void messages::UserInfo::addUserInfo(int *size, payload::packet *packet,
                                      p2p::myInfo const &myInfo) {
 
   auto *payload = packet->mutable_payload();
@@ -27,6 +27,7 @@ void messages::PeerInfo::addPeerInfo(int *size, payload::packet *packet,
   peerInfo->set_port(myInfo.myPort);
   peerInfo->set_ipaddress(myInfo.myIpAddress);
   peerInfo->set_username(myInfo.userName);
+  peerInfo->set_peername(myInfo.peerName);
 
   *size = packet->ByteSize() + 4;
 }
@@ -38,7 +39,7 @@ void messages::PeerInfo::addPeerInfo(int *size, payload::packet *packet,
  * @param[in, out] coded_output serialized object to send to peer
  * @param[in] packet packet object needed to serialize coded_output
  */
-void messages::PeerInfo::serializeMessage(output_stream *coded_output,
+void messages::UserInfo::serializeMessage(output_stream *coded_output,
                                           payload::packet &packet) {
 
   coded_output->WriteVarint32(packet.ByteSize());
