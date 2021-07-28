@@ -10,9 +10,10 @@ using namespace turbobeep;
 // Connect to the server upon socket creation
 p2p::Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
                std::string peerName)
-    : _connectionOpen(false), _peerName(peerName) {
+    : _connectionOpen(false) {
 
   _myInfo.userName = userName; 
+  _myInfo.peerName = peerName; 
 
   // Get own ip address
   _setIpAddress();
@@ -134,18 +135,9 @@ void p2p::Socket::_connectToServer() {
     throw std::runtime_error("Error connecting to server");
   }
 
-  // Start a thread to wait for response of server confirming
+  // Start a thread to wait for response of server comfirming
   // peer has connected
   _t = std::thread(&Socket::_listenToServer, this);
-
-  // Send message containing this peer info
-  std::string message = ipAddress() + "::" + std::to_string(port()) +
-                        "::" + userName() + "::" + _peerName;
-
-  // Upon connection, send my IP address to the server
-  // TODO: Remove this once server implementation is done @Edgar
-  send(_sockFD, message.c_str(), message.length() + 1, 0);
-
   _connectionOpen = true;
 }
 
@@ -158,8 +150,7 @@ void p2p::Socket::_sendMessage(){
   payload::packet packet; 
 
   // Add information to the packet
-  messages::PeerInfo::addPeerInfo(&size, &packet, myInfo());
-  std::cout << "Size: " << size << std::endl;
+  messages::UserInfo::addUserInfo(&size, &packet, myInfo());
 
   char *pkt = new char[size];
   array_output_stream aos(pkt, size);
@@ -167,10 +158,13 @@ void p2p::Socket::_sendMessage(){
       new google::protobuf::io::CodedOutputStream(&aos);
 
   // Serialize the message
-  messages::PeerInfo::serializeMessage(coded_output, packet); 
+  messages::UserInfo::serializeMessage(coded_output, packet); 
 
   // Send serialized packet
   send(_sockFD, (void *)pkt, coded_output->ByteCount(), 0);
+  
+  delete[] pkt;
+  delete coded_output; 
 }
 
 /**
