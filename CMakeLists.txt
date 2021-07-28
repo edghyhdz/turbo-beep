@@ -9,17 +9,25 @@ find_package(Protobuf REQUIRED)
 
 add_executable(p2p
     include/messages.h
-    include/socket_creator.h
-    protos/payload.pb.h
-    protos/payload.pb.cc
-    protos/payload.proto
     src/messages.cpp
+    src/main.cpp
+)
+
+# Client library
+add_library(client
+    include/socket_creator.h
     src/socket_creator.cpp
     src/socket/socket_utils.h
     src/socket/socket_utils.h
     src/socket/ip_call.h
     src/socket/port.h
-    src/main.cpp
+)
+
+# Protobuf payload library
+add_library(payload
+    protos/payload.pb.h
+    protos/payload.pb.cc
+    protos/payload.proto
 )
 
 include_directories(protos)
@@ -29,13 +37,29 @@ target_include_directories(p2p
         include
         PRIVATE
         protos
-        src)
+        src
+)
+
+target_include_directories(client
+    PUBLIC
+    include
+    PRIVATE
+    src
+)
 
 add_subdirectory(server)
 add_subdirectory(test)
 
-target_link_libraries(p2p 
-    ${CURL_LIBRARIES} 
+target_link_libraries(payload
     ${PROTOBUF_LIBRARY}
+)
+
+target_link_libraries(client
+    ${CURL_LIBRARIES} 
     Threads::Threads
+)
+
+target_link_libraries(p2p 
+    payload
+    client
 )
