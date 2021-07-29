@@ -136,27 +136,43 @@ void mediator::Server::_readyToP2P(int const &socket) {
   }
 }
 
-void mediator::Server::_findPeerInformation(payload::packet_PeerInfo &peerInfo, int sock){
-  // TODO: instead of true, should be message type
-  if (true) {
-    if (_userDescriptor.find(peerInfo.username()) == _userDescriptor.end()) {
+/**
+ * 
+ * @param peerInfo protobuf packet
+ * @param sock peer socket
+ */
+void mediator::Server::_findPeerInformation(payload::packet_Payload &payload, int sock){
+  auto *peerInfo = payload.mutable_peerinfo();
+  
+  if (payload::packet::PEER_INFO == payload.type()) {
+    if (_userDescriptor.find(peerInfo->username()) == _userDescriptor.end()) {
       // If username not found -> add it to map
       userInfo newUser;
-      newUser.ipAddress = peerInfo.ipaddress();
-      newUser.port = peerInfo.port(); 
-      newUser.name = peerInfo.username();
+      newUser.ipAddress = peerInfo->ipaddress();
+      newUser.port = peerInfo->port(); 
+      newUser.name = peerInfo->username();
       newUser.socket = sock;
-      newUser.peerInfo.name = peerInfo.peername();
-      _userDescriptor.insert(std::make_pair(peerInfo.username(), newUser));
-      _findPeer(peerInfo.username(), peerInfo.peername());
+      newUser.peerInfo.name = peerInfo->peername(); 
+      _userDescriptor.insert(std::make_pair(peerInfo->username(), newUser));
+      _findPeer(peerInfo->username(), peerInfo->peername());
     }
+  }
+  else {
+    std::cout << "Different type of message" << std::endl; 
   }
 }
 
+/**
+ * Read protobuf message body.
+ * Deserializes sent package from client
+ * 
+ * @param sock peer socket
+ * @param size size of the message as given by messages::Receive::readHeader()
+ * @param[in, out] packet protobuf packet, containing payload to be deserialized
+ */
 void mediator::Server::readBody(int sock, uint32g size, payload::packet *packet){
   int bytecount;
   char buffer[size + 4];
-
   bytecount = recv(sock, (void *)buffer, 4 + size, 0);
   _recvHandle->deserializeMessage(packet, buffer, size);
 }
@@ -178,29 +194,22 @@ void mediator::Server::runServer() {
         FD_SET(client, &_master);
       } else {
         // Accept new message
-        char buf[4096];
-        memset(buf, 0, 4096);
-        // Receive message
-        // int bytesIn = recv(sock, buf, 4096, 0);
-
         char buffer[4];
         int bytesIn;
         memset(buffer, '\0', 4);
-        // Testing part starts here
+
         // Peek into the socket and get the packet size
         if ((bytesIn = recv(sock, buffer, 4, MSG_PEEK)) <= 0) {
           close(sock);
           FD_CLR(sock, &_master);
           _removePeer(sock);
         } else {
-
           if (bytesIn > 0) {
-            // std::cout << "First read byte count is " << bytesIn << std::endl;
             payload::packet packet;
             (void)readBody(sock, _recvHandle->readHeader(buffer), &packet);
+            
             auto *payload = packet.mutable_payload();
-            auto *peerInfo = payload->mutable_peerinfo(); 
-            _findPeerInformation(*peerInfo, sock);
+            _findPeerInformation(*payload, sock);
           }
         }
         _readyToP2P(sock);

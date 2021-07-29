@@ -51,7 +51,7 @@ private:
   void _findPeer(std::string const &user, std::string const &peer);
   void _removePeer(int const &socket);
   void _readyToP2P(int const &socket);
-  void _findPeerInformation(payload::packet_PeerInfo& peerInfo, int sock);
+  void _findPeerInformation(payload::packet_Payload& payload, int sock);
 
   int _listening;
   fd_set _master;
