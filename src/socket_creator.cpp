@@ -7,11 +7,32 @@
 
 using namespace turbobeep;
 
+// Connect and hash keys and so
+p2p::Socket::Socket(char *&ipAddress, char *&portNum, std::string flag, std::string pathKeyPair,
+         std::string pathPeerPublicKey)
+    : _connectionOpen(false) {
+
+  _protoHandle = std::make_unique<messages::ProtoBuf>(); 
+  // _myInfo.userName = userName; 
+  // _myInfo.peerName = peerName; 
+
+  // Get own ip address
+  _setIpAddress();
+  std::cout << ipAddress << ":" << portNum << std::endl;
+  memset(&this->_hints, 0, sizeof(_hints));
+  _hints.ai_family = AF_UNSPEC;
+  _hints.ai_socktype = SOCK_STREAM;
+  _hints.ai_flags = AI_PASSIVE;
+  _addrInfo = getaddrinfo(ipAddress, portNum, &_hints, &_p);
+  _bindToPort();
+}
+
 // Connect to the server upon socket creation
 p2p::Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
                std::string peerName)
     : _connectionOpen(false) {
 
+  _protoHandle = std::make_unique<messages::ProtoBuf>(); 
   _myInfo.userName = userName; 
   _myInfo.peerName = peerName; 
 
