@@ -150,7 +150,7 @@ void p2p::Socket::_sendMessage(){
   payload::packet packet; 
 
   // Add information to the packet
-  messages::UserInfo::addUserInfo(&size, &packet, myInfo());
+  messages::ProtoBuf::addUserInfo(&size, &packet, myInfo());
 
   char *pkt = new char[size];
   array_output_stream aos(pkt, size);
@@ -158,7 +158,7 @@ void p2p::Socket::_sendMessage(){
       new google::protobuf::io::CodedOutputStream(&aos);
 
   // Serialize the message
-  messages::UserInfo::serializeMessage(coded_output, packet); 
+  messages::ProtoBuf::serializeMessage(coded_output, packet); 
 
   // Send serialized packet
   send(_sockFD, (void *)pkt, coded_output->ByteCount(), 0);
