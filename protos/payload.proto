@@ -8,6 +8,8 @@ message packet {
   enum MessageTypes {
       PEER_INFO = 0; 
       ADVERTISE = 1; 
+      CHALLENGE = 2; 
+      RESPONSE = 3; 
   }
 
   message Payload {
@@ -24,10 +26,10 @@ message packet {
   }
 
   message Crypto {
-      required string clientKey = 1; 
-      required bytes hashedKey = 2; 
-      required bytes encryptedHashedKey = 3; 
-      required bytes encryptedMsg = 4;  
+      optional bytes publicKey = 1; 
+      optional bytes hashedKey = 2; 
+      optional bytes encryptedHashedKey = 3; 
+      optional bytes encryptedMsg = 4;  
   }
 
   required Payload payload = 2; 
