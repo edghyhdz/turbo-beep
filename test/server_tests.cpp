@@ -29,14 +29,12 @@ void ServerFixture::SetUp() {
 
   // Get payload from peerinfo
   auto * payloadP1 = packetFirstPeer.mutable_payload();
-  auto * peerInfoP1 = payloadP1->mutable_peerinfo(); 
   auto * payloadP2 = packetSecondPeer.mutable_payload();
-  auto * peerInfoP2 = payloadP2->mutable_peerinfo();
 
   // PeerInfo contains all information that normally is sent to the server by
   // the peers
-  server.findPeerInfo(*peerInfoP1, 1);
-  server.findPeerInfo(*peerInfoP2, 2);
+  server.findPeerInfo(*payloadP1, 1);
+  server.findPeerInfo(*payloadP2, 2);
 }
 
 TEST_F(ServerFixture, findPeerInfo_FirstPeer) {

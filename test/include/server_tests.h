@@ -8,8 +8,8 @@ using namespace turbobeep;
 class mediator::TestServer : public mediator::Server {
 public:
   // Made them public to test
-  void findPeerInfo(payload::packet_PeerInfo &peerInfo, int sock){
-    _findPeerInformation(peerInfo, sock);
+  void findPeerInfo(payload::packet_Payload &payload, int sock){
+    _findPeerInformation(payload, sock);
   }
 
   void removePeer(const int &socket) { _removePeer(socket); }
