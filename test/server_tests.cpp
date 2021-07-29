@@ -24,8 +24,8 @@ void ServerFixture::SetUp() {
   setMyInfo(&secondPeer, "195.0.0.1", 4321, "SecondPeer", "FirstPeer");
 
   // Add user information to packet
-  messages::UserInfo::addUserInfo(&size, &packetFirstPeer, firstPeer);
-  messages::UserInfo::addUserInfo(&size, &packetSecondPeer, secondPeer);
+  messages::ProtoBuf::addUserInfo(&size, &packetFirstPeer, firstPeer);
+  messages::ProtoBuf::addUserInfo(&size, &packetSecondPeer, secondPeer);
 
   // Get payload from peerinfo
   auto * payloadP1 = packetFirstPeer.mutable_payload();
