@@ -20,7 +20,7 @@
 using namespace turbobeep; 
 
 mediator::Server::Server(std::uint16_t port) : _serverPort(port) {
-  _recvHandle = std::make_unique<messages::Receive>(); 
+  _protoHandle = std::make_unique<messages::ProtoBuf>(); 
   this->initServer(); 
 }
 
@@ -174,7 +174,7 @@ void mediator::Server::readBody(int sock, uint32g size, payload::packet *packet)
   int bytecount;
   char buffer[size + 4];
   bytecount = recv(sock, (void *)buffer, 4 + size, 0);
-  _recvHandle->deserializeMessage(packet, buffer, size);
+  _protoHandle->deserializeMessage(packet, buffer, size);
 }
 
 void mediator::Server::runServer() {
@@ -206,7 +206,7 @@ void mediator::Server::runServer() {
         } else {
           if (bytesIn > 0) {
             payload::packet packet;
-            (void)readBody(sock, _recvHandle->readHeader(buffer), &packet);
+            (void)readBody(sock, _protoHandle->readHeader(buffer), &packet);
             
             auto *payload = packet.mutable_payload();
             _findPeerInformation(*payload, sock);

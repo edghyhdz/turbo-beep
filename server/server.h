@@ -13,7 +13,7 @@ Server class declarations
 #define PORT_SERVER 54700
 #include <map>
 #include <set>
-#include "messages_receive.h"
+#include "messages.h"
 
 namespace turbobeep {
 namespace mediator {
@@ -57,7 +57,7 @@ private:
   fd_set _master;
   std::map<std::string, userInfo> _userDescriptor;
   std::uint16_t _serverPort;
-  std::unique_ptr<messages::Receive> _recvHandle; 
+  std::unique_ptr<messages::ProtoBuf> _protoHandle; 
 
   friend mediator::TestServer;
 };
