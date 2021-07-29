@@ -6,8 +6,8 @@ find_package(Protobuf REQUIRED)
 find_package(Threads REQUIRED)
 
 add_executable(server
-    ../include/messages_receive.h
-    ../src/messages_receive.cpp
+    ../include/messages.h
+    ../src/messages.cpp
     main.cpp
 )
 
