@@ -20,7 +20,7 @@ P2PMessage::P2PMessage() {
 P2PMessage::~P2PMessage() {}
 
 void P2PMessage::SetUp() {
-  messages::UserInfo::addUserInfo(&_size, &_packet, _socket->myInfo());
+  messages::ProtoBuf::addUserInfo(&_size, &_packet, _socket->myInfo());
 }
 
 void P2PMessage::TearDown() {
@@ -56,7 +56,7 @@ TEST_F(P2PMessage, BufferByteSizeTest) {
 
   tempPacket.set_time_stamp(tS);
 
-  // +4 is for the proto overhead
+  // 4-byte "magic number" that helps use identify size of the packet
   ASSERT_EQ(_size, tempPacket.ByteSize() + 4);
 }
 
@@ -67,9 +67,10 @@ TEST_F(P2PMessage, ProtobufferSerializationTestNoThrow) {
       new google::protobuf::io::CodedOutputStream(&aos);
 
   // Should serialize the message correctly
-  ASSERT_NO_THROW((void)messages::UserInfo::serializeMessage(coded_output, _packet));
+  ASSERT_NO_THROW((void)messages::ProtoBuf::serializeMessage(coded_output, _packet));
 
-  // Remove overhead from protobuffer and add overhead to store data
+  // Remove overhead from protobuffer and add the 4-byte "magic number" that helps
+  // use identify size of the packet
   ASSERT_EQ(coded_output->ByteCount(), _size - 4 + 1);
 
   std::cout << "Send message and free up them memory" << std::endl;
