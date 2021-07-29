@@ -10,16 +10,28 @@
 
 typedef google::protobuf::io::CodedOutputStream output_stream;
 typedef google::protobuf::io::ArrayOutputStream array_output_stream;
+typedef google::protobuf::uint32 uint32g;
+typedef google::protobuf::io::CodedInputStream input_stream;
+typedef google::protobuf::io::ArrayInputStream array_input_stream;
 
 namespace turbobeep {
 namespace messages {
 
-class UserInfo {
+class ProtoBuf {
 public:
   static void addUserInfo(int *size, payload::packet *packet,
                           p2p::myInfo const &myInfo);
   static void serializeMessage(output_stream *coded_output,
                                payload::packet &packet);
+
+  uint32g readHeader(char *buffer);
+  void deserializeMessage(payload::packet *packet, char *buffer,
+                                 uint32g size);
+
+private:
+  std::string _publicKey;
+  std::string _privateKey;
+  std::string _peerPublicKey;
 };
 
 } // namespace messages
