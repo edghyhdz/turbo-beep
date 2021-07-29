@@ -2,6 +2,7 @@
 
 using namespace turbobeep;
 
+messages::ProtoBuf::ProtoBuf(std::string keyPair, std::string peerPublicKey) {}
 
 /**
  * Serializes message packet after having added the data with

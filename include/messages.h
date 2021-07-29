@@ -19,6 +19,8 @@ namespace messages {
 
 class ProtoBuf {
 public:
+  ProtoBuf(){}; 
+  ProtoBuf(std::string keyPair, std::string peerPublicKey);
   static void addUserInfo(int *size, payload::packet *packet,
                           p2p::myInfo const &myInfo);
   static void serializeMessage(output_stream *coded_output,
