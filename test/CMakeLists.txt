@@ -9,9 +9,7 @@ find_package(Protobuf REQUIRED)
 # set(GMOCK_LIBRARIES /usr/lib/libgmock.a /usr/lib/libgmock_main.a)
 
 add_executable(tests 
-    ../include/messages_receive.h
     ../include/messages.h
-    ../src/messages_receive.cpp
     ../src/messages.cpp
     include/p2p_tests.h
     include/p2p_message_tests.h
