@@ -29,7 +29,8 @@ message packet {
       optional bytes publicKey = 1; 
       optional bytes hashedKey = 2; 
       optional bytes encryptedHashedKey = 3; 
-      optional bytes encryptedMsg = 4;  
+      optional bytes encryptedMsg = 4;
+      optional string nonce = 5;  
   }
 
   required Payload payload = 2; 
