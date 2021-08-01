@@ -1,5 +1,5 @@
-#ifndef MESSAGES
-#define MESSAGES
+#ifndef MESSAGES_H
+#define MESSAGES_H
 
 #include "payload.pb.h"
 #include "socket_creator.h"
