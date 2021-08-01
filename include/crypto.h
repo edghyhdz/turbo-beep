@@ -10,6 +10,10 @@ https://stackoverflow.com/questions/11705815/client-and-server-communication-usi
 #include "openssl/rsa.h"
 #include <string>
 
+#define ALPHANUM                                                               \
+  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+#define LEN_NONCE 25
+
 /*
 Class definition
 */
@@ -17,9 +21,15 @@ namespace turbobeep {
 namespace crypto {
 class RSA {
 public:
-  RSA(std::string myKey, std::string peerKey);
+  RSA(std::string keyPairPath, std::string peerPublicKeyPath); 
+  // RSA(std::string myKey, std::string peerKey);
+  std::string const publicKey();
+  std::string const signString(std::string const message);
+  std::string const privateKey(){ return _secretKey; }
+  std::string const generateNonce();
 
 private:
+  void _loadKeys(std::string &keyPairPath, std::string &peerKeyPath);
   std::string _secretKey;
   std::string _publicKey;
   std::string _peerPublicKey;
