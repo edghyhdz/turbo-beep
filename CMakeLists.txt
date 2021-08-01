@@ -6,6 +6,7 @@ enable_testing()
 find_package(CURL)
 find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 add_executable(p2p
     include/messages.h
@@ -21,6 +22,12 @@ add_library(client
     src/socket/socket_utils.h
     src/socket/ip_call.h
     src/socket/port.h
+)
+
+# Crypto
+add_library(cryptoRSA
+    include/crypto.h
+    src/crypto.cpp
 )
 
 # Protobuf payload library
@@ -47,8 +54,20 @@ target_include_directories(client
     src
 )
 
+target_include_directories(cryptoRSA
+        PUBLIC
+        include
+        PRIVATE
+        protos
+        src
+)
+
 add_subdirectory(server)
 add_subdirectory(test)
+
+target_link_libraries(cryptoRSA
+    OpenSSL::SSL     
+)
 
 target_link_libraries(payload
     ${PROTOBUF_LIBRARY}
