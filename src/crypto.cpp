@@ -132,15 +132,24 @@ std::string const crypto::RSA::generateNonce() {
   return tmp_s;
 }
 
-std::string const crypto::RSA::sha1(const unsigned char *input, unsigned long length)
+/**
+ * Hash string input and return it as a string
+ * 
+ * @param input string to hash
+ * @param length length of string to hash
+ */
+std::string const crypto::RSA::sha1(const std::string &input, unsigned long length)
 {
+  std::uint16_t len{20}; 
   std::stringstream ss;
-  unsigned char md[20];
-  ss << std::hex;
-  SHA1(input, length, md);
+  unsigned char md[len];
+  const unsigned char *inputChar =
+      reinterpret_cast<const unsigned char *>(input.c_str());
 
-  int i;
-  for (i = 0; i < 20; i++) {
+  ss << std::hex;
+  SHA1(inputChar, length, md);
+
+  for (int i = 0; i < len; i++) {
     ss << std::setw(2) << std::setfill('0') << (int)md[i];
   }
 
