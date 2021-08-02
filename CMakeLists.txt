@@ -9,32 +9,32 @@ find_package(Protobuf REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 add_executable(p2p
-    include/messages.h
-    src/messages.cpp
-    src/main.cpp
+    ${PROJECT_SOURCE_DIR}/include/messages.h
+    ${PROJECT_SOURCE_DIR}/src/messages.cpp
+    ${PROJECT_SOURCE_DIR}/src/main.cpp
 )
 
 # Client library
 add_library(client
-    include/socket_creator.h
-    src/socket_creator.cpp
-    src/socket/socket_utils.h
-    src/socket/socket_utils.h
-    src/socket/ip_call.h
-    src/socket/port.h
+    ${PROJECT_SOURCE_DIR}/include/socket_creator.h
+    ${PROJECT_SOURCE_DIR}/src/socket_creator.cpp
+    ${PROJECT_SOURCE_DIR}/src/socket/socket_utils.h
+    ${PROJECT_SOURCE_DIR}/src/socket/socket_utils.h
+    ${PROJECT_SOURCE_DIR}/src/socket/ip_call.h
+    ${PROJECT_SOURCE_DIR}/src/socket/port.h
 )
 
 # Crypto
 add_library(cryptoRSA
-    include/crypto.h
-    src/crypto.cpp
+    ${PROJECT_SOURCE_DIR}/include/crypto.h
+    ${PROJECT_SOURCE_DIR}/src/crypto.cpp
 )
 
 # Protobuf payload library
 add_library(payload
-    protos/payload.pb.h
-    protos/payload.pb.cc
-    protos/payload.proto
+    ${PROJECT_SOURCE_DIR}/protos/payload.pb.h
+    ${PROJECT_SOURCE_DIR}/protos/payload.pb.cc
+    ${PROJECT_SOURCE_DIR}/protos/payload.proto
 )
 
 include_directories(protos)
@@ -74,6 +74,7 @@ target_link_libraries(payload
 )
 
 target_link_libraries(client
+    cryptoRSA
     ${CURL_LIBRARIES} 
     Threads::Threads
 )
