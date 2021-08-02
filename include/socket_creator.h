@@ -29,7 +29,9 @@ struct myInfo {
   std::string myIpAddress; 
   std::uint16_t myPort; 
   std::string userName; 
+  std::string myHash;
   std::string peerName; 
+  std::string peerHash; 
 }; 
 
 class Socket {
