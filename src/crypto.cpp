@@ -140,12 +140,13 @@ void crypto::RSA::_loadKeys(std::string &keyPath, std::string &peerPath) {
   std::ifstream pKeyRaw(peerPath); // Peer public key file
   std::string peerKey, key;
   std::string delimiter{"-----END RSA PRIVATE KEY-----"};
-  std::string delimiterPubKey{"-----BEGIN PUBLIC KEY-----"};
   bool finishedSecretKey{false};
 
   if (sKeyRaw) {
     std::string line;
     while (getline(sKeyRaw, line)) {
+      if (line == "")
+        continue;
       key += line + "\n";
       if (line.find(delimiter) != std::string::npos) {
         // Remove trailing space
@@ -153,9 +154,10 @@ void crypto::RSA::_loadKeys(std::string &keyPath, std::string &peerPath) {
         this->_secretKey = key;
         finishedSecretKey = true;
       }
-      // Ignore spaces in between if any
-      if (finishedSecretKey && line == "") {
+
+      if (finishedSecretKey) {
         key = "";
+        finishedSecretKey = false; 
       }
     }
     key = key.substr(0, key.size() - 1);
@@ -172,4 +174,5 @@ void crypto::RSA::_loadKeys(std::string &keyPath, std::string &peerPath) {
     peerKey = peerKey.substr(0, peerKey.size() - 1);
     this->_peerPublicKey = peerKey;
   }
+  std::cout << "Pub key: \n" << _publicKey << std::endl;
 }
