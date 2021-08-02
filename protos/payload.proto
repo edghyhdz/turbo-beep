@@ -28,9 +28,10 @@ message packet {
   message Crypto {
       optional bytes publicKey = 1; 
       optional bytes hashedKey = 2; 
-      optional bytes encryptedHashedKey = 3; 
-      optional bytes encryptedMsg = 4;
-      optional string nonce = 5;  
+      optional bytes peerHashedKey = 3; 
+      optional bytes encryptedHashedKey = 4; 
+      optional bytes encryptedMsg = 5;
+      optional string nonce = 6;  
   }
 
   required Payload payload = 2; 
