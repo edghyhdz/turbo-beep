@@ -30,7 +30,7 @@ public:
   std::string decryptWithPublicKey(const std::string &message, const std::string & pubKey); 
   std::string const privateKey(){ return _secretKey; }
   std::string const generateNonce();
-  std::string const sha1(const unsigned char *input, unsigned long length);
+  std::string const sha1(const std::string &input, unsigned long length);
 
 private:
   void _loadKeys(std::string &keyPairPath, std::string &peerKeyPath);
