@@ -21,6 +21,7 @@ namespace turbobeep {
 namespace crypto {
 class RSA {
 public:
+  RSA(){};
   RSA(std::string keyPairPath, std::string peerPublicKeyPath); 
   // RSA(std::string myKey, std::string peerKey);
   std::string const publicKey() { return _publicKey; }
@@ -29,6 +30,7 @@ public:
   std::string decryptWithPublicKey(const std::string &message, const std::string & pubKey); 
   std::string const privateKey(){ return _secretKey; }
   std::string const generateNonce();
+  std::string const sha1(const unsigned char *input, unsigned long length);
 
 private:
   void _loadKeys(std::string &keyPairPath, std::string &peerKeyPath);

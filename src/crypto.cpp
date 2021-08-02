@@ -4,6 +4,9 @@
 #include <fstream>
 #include <iostream>
 #include <openssl/pem.h>
+#include <openssl/sha.h>
+#include <sstream>  
+#include <iomanip>
 #include <string.h>
 #include <unistd.h>
 
@@ -127,6 +130,21 @@ std::string const crypto::RSA::generateNonce() {
     tmp_s += ALPHANUM[rand() % (sizeof(ALPHANUM) - 1)];
 
   return tmp_s;
+}
+
+std::string const crypto::RSA::sha1(const unsigned char *input, unsigned long length)
+{
+  std::stringstream ss;
+  unsigned char md[20];
+  ss << std::hex;
+  SHA1(input, length, md);
+
+  int i;
+  for (i = 0; i < 20; i++) {
+    ss << std::setw(2) << std::setfill('0') << (int)md[i];
+  }
+
+  return ss.str();
 }
 
 /**
