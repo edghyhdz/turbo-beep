@@ -2,7 +2,7 @@
 
 using namespace turbobeep;
 
-messages::ProtoBuf::ProtoBuf(std::string keyPair, std::string peerPublicKey) {}
+// messages::ProtoBuf::ProtoBuf(std::string keyPair, std::string peerPublicKey) {}
 
 /**
  * Serializes message packet after having added the data with
@@ -16,6 +16,7 @@ void messages::ProtoBuf::addUserInfo(int *size, payload::packet *packet,
                                      p2p::myInfo const &myInfo) {
 
   auto *payload = packet->mutable_payload();
+  auto *crypto = payload->mutable_crypto(); 
   auto *peerInfo = payload->mutable_peerinfo();
 
   const auto timeStamp = std::chrono::system_clock::now();
@@ -24,12 +25,15 @@ void messages::ProtoBuf::addUserInfo(int *size, payload::packet *packet,
                 .count();
 
   packet->set_time_stamp(tS);
-  payload->set_type(packet->PEER_INFO);
+  payload->set_type(packet->ADVERTISE);
   peerInfo->set_port(myInfo.myPort);
   peerInfo->set_ipaddress(myInfo.myIpAddress);
   peerInfo->set_username(myInfo.userName);
   peerInfo->set_peername(myInfo.peerName);
 
+  crypto->set_hashedkey(myInfo.myHash);
+  crypto->set_peerhashedkey(myInfo.peerHash); 
+  
   // 4-byte "magic number" to help use identify size of the packet
   *size = packet->ByteSize() + 4;
 }
