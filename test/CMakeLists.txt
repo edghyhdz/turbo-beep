@@ -14,12 +14,12 @@ add_executable(tests
     include/p2p_tests.h
     include/p2p_message_tests.h
     include/server_tests.h
-    include/test_crypto_messages.h
+    include/messages_crypto_tests.h
     include/tests.h
     
     p2p_tests.cpp
     p2p_message_tests.cpp
-    test_crypto_messages.cpp
+    messages_crypto_tests.cpp
     server_tests.cpp
 
     main.cpp
