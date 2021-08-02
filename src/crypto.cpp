@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <openssl/pem.h>
+#include <string.h>
 #include <unistd.h>
 
 using namespace turbobeep;
@@ -11,6 +12,99 @@ using namespace turbobeep;
 crypto::RSA::RSA(std::string keyPairPath, std::string peerPublicKeyPath) {
   // Load both keys into private member variables
   _loadKeys(keyPairPath, peerPublicKeyPath);
+}
+
+/**
+ * Decrypt with public key
+ * @param message encrypted message
+ * @param pubKey public key to use to decrypt message
+ */
+std::string crypto::RSA::decryptWithPublicKey(const std::string &message,
+                                              const std::string &pubKey) {
+  std::string decrypt_text;
+	BIO *keybio = BIO_new_mem_buf((unsigned char *)pubKey.c_str(), -1);
+	::RSA* rsa = RSA_new();
+	
+	 // Note-------Use the public key in the first format for decryption
+	rsa = PEM_read_bio_RSAPublicKey(keybio, &rsa, NULL, NULL);
+	 // Note-------Use the public key in the second format for decryption (we use this format as an example)
+	// rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa, NULL, NULL);
+	if (!rsa)
+	{
+		BIO_free_all(keybio);
+        return ""; 
+	}
+ 
+	 // Get the maximum length of RSA single processing
+	int len = RSA_size(rsa);
+	char *sub_text = new char[len + 1];
+	memset(sub_text, 0, len + 1);
+	int ret = 0;
+	std::string sub_str;
+	int pos = 0;
+
+  int counter = 0; 
+	// Decrypt the ciphertext in segments
+	while (pos < message.length()) {
+		sub_str = message.substr(pos, len);
+		memset(sub_text, 0, len + 1);
+		ret = RSA_public_decrypt(sub_str.length(), (const unsigned char*)sub_str.c_str(), (unsigned char*)sub_text, rsa, RSA_PKCS1_PADDING);
+		if (ret >= 0) {
+			decrypt_text.append(std::string(sub_text, ret));
+			pos += len;
+		}
+    counter++; 
+    if (counter>5000){
+      break; 
+    }
+	}
+ 
+	// release memory  
+	delete sub_text;
+	BIO_free_all(keybio);
+	RSA_free(rsa);
+ 
+	return decrypt_text;
+}
+
+std::string const crypto::RSA::signString(const std::string &message) {
+  	std::string encrypt_text;
+	BIO *keybio = BIO_new_mem_buf((unsigned char *)_secretKey.c_str(), -1);
+	::RSA* rsa = RSA_new();
+	rsa = PEM_read_bio_RSAPrivateKey(keybio, &rsa, NULL, NULL);
+	if (!rsa)
+	{
+		BIO_free_all(keybio);
+		return "";
+	}
+ 
+	 // Get the maximum length of the data block that RSA can process at a time
+	int key_len = RSA_size(rsa);
+	 int block_len = key_len-11; // Because the filling method is RSA_PKCS1_PADDING, so you need to subtract 11 from the key_len
+ 
+	 // Apply for memory: store encrypted ciphertext data
+	char *sub_text = new char[key_len + 1];
+	memset(sub_text, 0, key_len + 1);
+	int ret = 0;
+	int pos = 0;
+	std::string sub_str;
+	 // Encrypt the data in segments (the return value is the length of the encrypted data)
+	while (pos < message.length()) {
+		sub_str = message.substr(pos, block_len);
+		memset(sub_text, 0, key_len + 1);
+		ret = RSA_private_encrypt(sub_str.length(), (const unsigned char*)sub_str.c_str(), (unsigned char*)sub_text, rsa, RSA_PKCS1_PADDING);
+		if (ret >= 0) {
+			encrypt_text.append(std::string(sub_text, ret));
+		}
+		pos += block_len;
+	}
+	
+	 // release memory  
+	delete sub_text;
+	BIO_free_all(keybio);
+	RSA_free(rsa);
+ 
+	return encrypt_text;
 }
 
 /**
@@ -42,10 +136,11 @@ std::string const crypto::RSA::generateNonce() {
  * @param peerPath path to peer's public key
  */
 void crypto::RSA::_loadKeys(std::string &keyPath, std::string &peerPath) {
-  std::ifstream sKeyRaw(keyPath);   // My own key pair file
-  std::ifstream pKeyRaw(peerPath);  // Peer public key file
+  std::ifstream sKeyRaw(keyPath);  // My own key pair file
+  std::ifstream pKeyRaw(peerPath); // Peer public key file
   std::string peerKey, key;
   std::string delimiter{"-----END RSA PRIVATE KEY-----"};
+  std::string delimiterPubKey{"-----BEGIN PUBLIC KEY-----"};
   bool finishedSecretKey{false};
 
   if (sKeyRaw) {
@@ -58,10 +153,9 @@ void crypto::RSA::_loadKeys(std::string &keyPath, std::string &peerPath) {
         this->_secretKey = key;
         finishedSecretKey = true;
       }
-
-      if (finishedSecretKey) {
+      // Ignore spaces in between if any
+      if (finishedSecretKey && line == "") {
         key = "";
-        finishedSecretKey = false;
       }
     }
     key = key.substr(0, key.size() - 1);
