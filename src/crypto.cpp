@@ -16,55 +16,56 @@ crypto::RSA::RSA(std::string keyPairPath, std::string peerPublicKeyPath) {
 
 /**
  * Decrypt with public key
+ * Reference: https://www.programmersought.com/article/37955188510/
+ * 
  * @param message encrypted message
  * @param pubKey public key to use to decrypt message
  */
 std::string crypto::RSA::decryptWithPublicKey(const std::string &message,
                                               const std::string &pubKey) {
   std::string decrypt_text;
-	BIO *keybio = BIO_new_mem_buf((unsigned char *)pubKey.c_str(), -1);
-	::RSA* rsa = RSA_new();
-	
-	 // Note-------Use the public key in the first format for decryption
-	rsa = PEM_read_bio_RSAPublicKey(keybio, &rsa, NULL, NULL);
-	 // Note-------Use the public key in the second format for decryption (we use this format as an example)
-	// rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa, NULL, NULL);
-	if (!rsa)
-	{
-		BIO_free_all(keybio);
-        return ""; 
-	}
- 
-	 // Get the maximum length of RSA single processing
-	int len = RSA_size(rsa);
-	char *sub_text = new char[len + 1];
-	memset(sub_text, 0, len + 1);
-	int ret = 0;
-	std::string sub_str;
-	int pos = 0;
+  BIO *keybio = BIO_new_mem_buf((unsigned char *)pubKey.c_str(), -1);
+  ::RSA *rsa = RSA_new();
 
-  int counter = 0; 
-	// Decrypt the ciphertext in segments
-	while (pos < message.length()) {
-		sub_str = message.substr(pos, len);
-		memset(sub_text, 0, len + 1);
-		ret = RSA_public_decrypt(sub_str.length(), (const unsigned char*)sub_str.c_str(), (unsigned char*)sub_text, rsa, RSA_PKCS1_PADDING);
-		if (ret >= 0) {
-			decrypt_text.append(std::string(sub_text, ret));
-			pos += len;
-		}
-    counter++; 
-    if (counter>5000){
-      break; 
+  rsa = PEM_read_bio_RSAPublicKey(keybio, &rsa, NULL, NULL);
+
+  if (!rsa) {
+    BIO_free_all(keybio);
+    return "";
+  }
+
+  // Get the maximum length of RSA single processing
+  int len = RSA_size(rsa);
+  char *sub_text = new char[len + 1];
+  memset(sub_text, 0, len + 1);
+  int ret = 0;
+  std::string sub_str;
+  int pos = 0;
+
+  int counter = 0;
+  // Decrypt the ciphertext in segments
+  while (pos < message.length()) {
+    sub_str = message.substr(pos, len);
+    memset(sub_text, 0, len + 1);
+    ret = RSA_public_decrypt(sub_str.length(),
+                             (const unsigned char *)sub_str.c_str(),
+                             (unsigned char *)sub_text, rsa, RSA_PKCS1_PADDING);
+    if (ret >= 0) {
+      decrypt_text.append(std::string(sub_text, ret));
+      pos += len;
     }
-	}
- 
-	// release memory  
-	delete sub_text;
-	BIO_free_all(keybio);
-	RSA_free(rsa);
- 
-	return decrypt_text;
+    counter++;
+    if (counter > 5000) {
+      break;
+    }
+  }
+
+  // release memory
+  delete sub_text;
+  BIO_free_all(keybio);
+  RSA_free(rsa);
+
+  return decrypt_text;
 }
 
 std::string const crypto::RSA::signString(const std::string &message) {
@@ -174,5 +175,4 @@ void crypto::RSA::_loadKeys(std::string &keyPath, std::string &peerPath) {
     peerKey = peerKey.substr(0, peerKey.size() - 1);
     this->_peerPublicKey = peerKey;
   }
-  std::cout << "Pub key: \n" << _publicKey << std::endl;
 }
