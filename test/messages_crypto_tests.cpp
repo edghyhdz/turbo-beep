@@ -9,15 +9,17 @@ CryptoFixture::CryptoFixture() {}
 CryptoFixture::~CryptoFixture() {}
 
 void CryptoFixture::SetUp() {
-  std::string keyPairPath{"./private.pem"};
-  std::string peerPublicKeyPath{"./public.pem"};
+  std::string keyPairPath{"./mykeypair.pem"};
+  std::string peerPublicKeyPath{"./peer.pem"};
   _crypto = std::make_shared<crypto::RSA>(keyPairPath, peerPublicKeyPath);
 }
 void CryptoFixture::TearDown() {}
 
-TEST_F(CryptoFixture, TestNonce) {
+TEST_F(CryptoFixture, TestSigningAndDecryptingNonce) {
   auto nonce = _crypto->generateNonce();
-
   std::cout << "Nonce: " << nonce << std::endl;
-  ASSERT_EQ(1, 1);
+  std::string encrypted_nonce = _crypto->signString(nonce);
+  std::string decrypted_nonce = _crypto->decryptWithPublicKey(encrypted_nonce, _crypto->publicKey()); 
+
+  ASSERT_EQ(nonce, decrypted_nonce);
 }
