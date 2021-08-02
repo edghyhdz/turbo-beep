@@ -50,6 +50,8 @@ public:
   std::uint16_t port() const { return _myInfo.myPort; }
   std::string userName() const { return _myInfo.userName; }
   std::string peerName() const { return _myInfo.peerName; }
+  std::string hashedKey() const { return _myInfo.myHash; }
+  std::string peerHashedKey() const { return _myInfo.peerHash; }
 
 private:
   std::unique_ptr<messages::ProtoBuf> _protoHandle; 
