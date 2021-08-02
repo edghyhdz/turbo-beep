@@ -42,9 +42,10 @@ TEST_F(P2PMessage, BufferByteSizeTest) {
 
   // Get the bytecount to compare with that returned by serializeMessage()
   auto *payload = tempPacket.mutable_payload();
+  auto *crypto = payload->mutable_crypto(); 
   auto *peerInfo = payload->mutable_peerinfo();
 
-  payload->set_type(tempPacket.PEER_INFO);
+  payload->set_type(tempPacket.ADVERTISE);
   peerInfo->set_port(_socket->port());
   peerInfo->set_ipaddress(_socket->ipAddress());
   peerInfo->set_username(_socket->userName());
@@ -55,6 +56,9 @@ TEST_F(P2PMessage, BufferByteSizeTest) {
                 .count();
 
   tempPacket.set_time_stamp(tS);
+
+  crypto->set_hashedkey(_socket->hashedKey());
+  crypto->set_peerhashedkey(_socket->peerHashedKey()); 
 
   // 4-byte "magic number" that helps use identify size of the packet
   ASSERT_EQ(_size, tempPacket.ByteSize() + 4);
