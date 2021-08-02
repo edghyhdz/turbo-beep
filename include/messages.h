@@ -3,6 +3,7 @@
 
 #include "payload.pb.h"
 #include "socket_creator.h"
+#include "crypto.h"
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -17,10 +18,11 @@ typedef google::protobuf::io::ArrayInputStream array_input_stream;
 namespace turbobeep {
 namespace messages {
 
-class ProtoBuf {
+class ProtoBuf : public crypto::RSA {
 public:
-  ProtoBuf(){}; 
-  ProtoBuf(std::string keyPair, std::string peerPublicKey);
+  ProtoBuf(){};
+  ProtoBuf(std::string keyPair, std::string peerPublicKey)
+      : RSA(keyPair, peerPublicKey){};
   static void addUserInfo(int *size, payload::packet *packet,
                           p2p::myInfo const &myInfo);
   static void serializeMessage(output_stream *coded_output,
