@@ -34,7 +34,7 @@ struct myInfo {
   std::string peerHash; 
 }; 
 
-class Socket {
+class Socket{
 public:
   Socket(char *&ipAddress, char *&portNum, std::string flag, std::string pathKeyPair,
          std::string pathPeerPublicKey);
@@ -42,7 +42,7 @@ public:
   Socket(char *&ipAddress, char *&portNum, std::string userName,
          std::string peerName);
   ~Socket();
-  void connectToServer();
+  void connectToServer(payload::packet::MessageTypes &mType);
   void connectToPeer();
   void close();
   p2p::myInfo myInfo() const & { return _myInfo; }
@@ -57,7 +57,7 @@ private:
   std::unique_ptr<messages::ProtoBuf> _protoHandle; 
   addrinfo _hints, *_p;
   struct sockaddr_in _myAddr, _peerAddr;
-  void _sendMessage(); 
+  void _sendMessage(payload::packet::MessageTypes &mType); 
   void _setIpAddress();
   void _setPort();
   void _bindToPort();

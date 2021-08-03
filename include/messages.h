@@ -24,7 +24,8 @@ public:
   ProtoBuf(std::string keyPair, std::string peerPublicKey)
       : RSA(keyPair, peerPublicKey){};
   static void addUserInfo(int *size, payload::packet *packet,
-                          p2p::myInfo const &myInfo);
+                          p2p::myInfo const &myInfo,
+                          payload::packet::MessageTypes &mType);
   static void serializeMessage(output_stream *coded_output,
                                payload::packet &packet);
 
