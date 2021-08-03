@@ -13,7 +13,8 @@ using namespace turbobeep;
  * @param[in] myInfo struct containing user information (port, ip, name)
  */
 void messages::ProtoBuf::addUserInfo(int *size, payload::packet *packet,
-                                     p2p::myInfo const &myInfo) {
+                                     p2p::myInfo const &myInfo,
+                                     payload::packet::MessageTypes &mType) {
 
   auto *payload = packet->mutable_payload();
   auto *crypto = payload->mutable_crypto(); 
@@ -25,7 +26,7 @@ void messages::ProtoBuf::addUserInfo(int *size, payload::packet *packet,
                 .count();
 
   packet->set_time_stamp(tS);
-  payload->set_type(packet->ADVERTISE);
+  payload->set_type(mType);
   peerInfo->set_port(myInfo.myPort);
   peerInfo->set_ipaddress(myInfo.myIpAddress);
   peerInfo->set_username(myInfo.userName);

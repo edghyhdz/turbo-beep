@@ -20,7 +20,8 @@ P2PMessage::P2PMessage() {
 P2PMessage::~P2PMessage() {}
 
 void P2PMessage::SetUp() {
-  messages::ProtoBuf::addUserInfo(&_size, &_packet, _socket->myInfo());
+  auto mTypePI = payload::packet_MessageTypes_PEER_INFO;
+  messages::ProtoBuf::addUserInfo(&_size, &_packet, _socket->myInfo(), mTypePI);
 }
 
 void P2PMessage::TearDown() {

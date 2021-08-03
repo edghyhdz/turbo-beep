@@ -12,9 +12,16 @@ p2p::Socket::Socket(char *&ipAddress, char *&portNum, std::string flag, std::str
          std::string pathPeerPublicKey)
     : _connectionOpen(false) {
 
-  _protoHandle = std::make_unique<messages::ProtoBuf>(); 
-  // _myInfo.userName = userName; 
-  // _myInfo.peerName = peerName; 
+  _protoHandle = std::make_unique<messages::ProtoBuf>(pathKeyPair, pathPeerPublicKey);
+  _myInfo.userName = ""; 
+  _myInfo.peerName = ""; 
+  _myInfo.myHash = _protoHandle->sha1(_protoHandle->publicKey(),
+                                        _protoHandle->publicKey().length());
+  _myInfo.peerHash = _protoHandle->sha1(_protoHandle->peerPublicKey(),
+                                        _protoHandle->peerPublicKey().length());
+
+  std::cout << "My hash: \n" << _myInfo.myHash << std::endl;
+  std::cout << "Peer hash: \n" << _myInfo.peerHash << std::endl;
 
   // Get own ip address
   _setIpAddress();
@@ -48,7 +55,10 @@ p2p::Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
 }
 
 // Destructor
-p2p::Socket::~Socket() { _t.join(); }
+p2p::Socket::~Socket() {
+  if (_t.joinable())
+   _t.join(); 
+}
 
 // TODO: This implementation will change, since this is just a feasibility
 // example
@@ -165,13 +175,13 @@ void p2p::Socket::_connectToServer() {
 /**
  * Description here...
  */
-void p2p::Socket::_sendMessage(){
+void p2p::Socket::_sendMessage(payload::packet::MessageTypes &mType){
 
   int size; 
   payload::packet packet; 
 
   // Add information to the packet
-  messages::ProtoBuf::addUserInfo(&size, &packet, myInfo());
+  messages::ProtoBuf::addUserInfo(&size, &packet, myInfo(), mType);
 
   char *pkt = new char[size];
   array_output_stream aos(pkt, size);
@@ -194,11 +204,11 @@ void p2p::Socket::_sendMessage(){
  * and ip address. 
  * After that this method will return
  */
-void p2p::Socket::connectToServer() {
+void p2p::Socket::connectToServer(payload::packet::MessageTypes &mType) {
   _connectToServer();
 
   // After connecting to the server, send message
-  _sendMessage(); 
+  _sendMessage(mType); 
 
   // wait until other client has connected
   std::unique_lock<std::mutex> lck(_mutex);
