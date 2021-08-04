@@ -58,7 +58,7 @@ int P2PFixture::peerWrapper() {
 }
 
 TEST_F(P2PFixture, SuccessfulDiscconectFromServerAferBothPeersOnline) {
-    auto mTypePI = payload::packet_MessageTypes_PEER_INFO; 
+  auto mTypePI = payload::packet_MessageTypes_PEER_INFO;
 
   _tServer = std::thread(&mediator::Server::runServer, _server);
   _tPeer = std::thread(&p2p::Socket::connectToServer, _peerOne,  std::ref(mTypePI));
