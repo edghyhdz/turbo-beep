@@ -25,6 +25,7 @@ target_include_directories(server_lib
 
 target_link_libraries(server 
     server_lib
+    cryptoRSA
     payload
     Threads::Threads
 )
