@@ -57,7 +57,6 @@ private:
   std::unique_ptr<messages::ProtoBuf> _protoHandle; 
   addrinfo _hints, *_p;
   struct sockaddr_in _myAddr, _peerAddr;
-  void _sendMessage(payload::packet::MessageTypes &mType); 
   void _setIpAddress();
   void _setPort();
   void _bindToPort();
@@ -69,6 +68,7 @@ private:
   int _sockFD;
   int _connFD;
   int _addrInfo;
+  bool _needsAuth; 
   bool _connectionOpen;
   std::thread _t;
   std::string _peerName;
