@@ -38,6 +38,7 @@ public:
   void readBody(int sock, uint32g size, payload::packet *packet);
   void sendMessage(int size, int sock, payload::packet &packet);
   bool receiveMessage(int sock, payload::packet *packet); 
+  bool receiveMessage(int sock, std::string *recvMsg);
 
 private:
   std::string _publicKey;
