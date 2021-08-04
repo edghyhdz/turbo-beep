@@ -31,7 +31,8 @@ message packet {
       optional bytes peerHashedKey = 3; 
       optional bytes encryptedHashedKey = 4; 
       optional bytes encryptedMsg = 5;
-      optional string nonce = 6;  
+      optional string nonce = 6;
+      optional string encryptedNonce = 7;   
   }
 
   required Payload payload = 2; 
