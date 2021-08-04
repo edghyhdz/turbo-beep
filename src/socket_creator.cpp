@@ -173,7 +173,12 @@ void p2p::Socket::_connectToServer() {
 }
 
 /**
- * Description here...
+ * Sends first message to server to either begin authentication or to wait for
+ * peer to connect. Server receives peer (client) information and to whom it
+ * wants to connect to
+ *
+ * @param mType payload message type - used to tell if user wants to
+ * authenticate
  */
 void p2p::Socket::_sendMessage(payload::packet::MessageTypes &mType){
 
