@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+#include <algorithm>
 #include <thread>
 
 /*****************************************************************************
@@ -137,13 +138,17 @@ void mediator::Server::_readyToP2P(int const &socket) {
 }
 
 /**
- * 
+ * Finds peer information. Checks whether peer has already connected to the
+ * mediator and is ready to connect to peer. If not then user is added to the
+ * userInfo struct
+ *
  * @param peerInfo protobuf packet
  * @param sock peer socket
  */
 void mediator::Server::_findPeerInformation(payload::packet_Payload &payload, int sock){
   auto *peerInfo = payload.mutable_peerinfo();
-  
+  auto *crypto = payload.mutable_crypto();
+
   if (payload::packet::PEER_INFO == payload.type()) {
     if (_userDescriptor.find(peerInfo->username()) == _userDescriptor.end()) {
       // If username not found -> add it to map
@@ -157,24 +162,13 @@ void mediator::Server::_findPeerInformation(payload::packet_Payload &payload, in
       _findPeer(peerInfo->username(), peerInfo->peername());
     }
   }
+  else if (payload::packet::ADVERTISE == payload.type()){
+    std::cout << "Peer1 hashed key: " << crypto->hashedkey() << std::endl;
+    std::cout << "Peer2 hashed key: " << crypto->peerhashedkey() << std::endl;
+  }
   else {
     std::cout << "Different type of message" << std::endl; 
   }
-}
-
-/**
- * Read protobuf message body.
- * Deserializes sent package from client
- * 
- * @param sock peer socket
- * @param size size of the message as given by messages::Receive::readHeader()
- * @param[in, out] packet protobuf packet, containing payload to be deserialized
- */
-void mediator::Server::readBody(int sock, uint32g size, payload::packet *packet){
-  int bytecount;
-  char buffer[size + 4];
-  bytecount = recv(sock, (void *)buffer, 4 + size, 0);
-  _protoHandle->deserializeMessage(packet, buffer, size);
 }
 
 void mediator::Server::runServer() {
@@ -193,22 +187,28 @@ void mediator::Server::runServer() {
         // Add new connection to the list of connected clients
         FD_SET(client, &_master);
       } else {
-        // Accept new message
-        char buffer[4];
-        int bytesIn;
-        memset(buffer, '\0', 4);
+        payload::packet packet; 
 
-        // Peek into the socket and get the packet size
-        if ((bytesIn = recv(sock, buffer, 4, MSG_PEEK)) <= 0) {
+        // Check if there is a message
+        if (!_protoHandle->receiveMessage(sock, &packet)){
           close(sock);
           FD_CLR(sock, &_master);
           _removePeer(sock);
         } else {
-          if (bytesIn > 0) {
-            payload::packet packet;
-            (void)readBody(sock, _protoHandle->readHeader(buffer), &packet);
-            
-            auto *payload = packet.mutable_payload();
+          auto *payload = packet.mutable_payload();
+          if (payload->type() == payload::packet::ADVERTISE) {
+            _needAuthentication.push_back(sock);
+            // TODO:
+            // Authentication happens here. Check if  this needs to be started
+            // via threads If so then use mutex to avoid data races
+            if (!this->authenticate(sock, *payload)) {
+              std::cout << "Closing socket" << std::endl;
+              close(sock);
+              FD_CLR(sock, &_master);
+            }
+          }
+          if (std::find(_needAuthentication.begin(), _needAuthentication.end(),
+                        sock) == _needAuthentication.end()) {
             _findPeerInformation(*payload, sock);
           }
         }
@@ -216,4 +216,57 @@ void mediator::Server::runServer() {
       }
     }
   }
+}
+
+/**
+ * Authenticate connecting socket
+ * 
+ * @param sock user socket that will be authenticated
+ * @param payload payload containing peer user info (prob not needed here)
+ */ 
+bool mediator::Server::authenticate(int sock, payload::packet_Payload &payload){
+  int size;
+  payload::packet challenge, response;
+
+  // Generate nonce to send for challenge request
+  auto nonce = _protoHandle->generateNonce();
+
+  // Challenge packet
+  auto *pLoad = challenge.mutable_payload(); 
+  auto *crypto = pLoad->mutable_crypto(); 
+
+  // Set params to packet payload
+  challenge.set_time_stamp(messages::ProtoBuf::getTimeStamp());
+  pLoad->set_type(payload::packet_MessageTypes_CHALLENGE); 
+  crypto->set_nonce(nonce);
+  
+  // Get packet size
+  size = challenge.ByteSize() + 4;
+
+  // Send message and wait for challenge response
+  _protoHandle->sendMessage(size, sock, challenge); 
+
+  // Get challenge response with encrypted nonce
+  if (!_protoHandle->receiveMessage(sock, &response)){
+    std::cout << "Could not authenticate" << std::endl; 
+    return false; 
+  }
+
+  // Get encrypted nonce sent by peer
+  pLoad = response.mutable_payload(); 
+  crypto = pLoad->mutable_crypto(); 
+  std::string encryptedNonce = crypto->encryptednonce(); 
+
+  if (encryptedNonce != "decryptedNonce"){
+    std::cout << "Could not authenticate... bye bye" << std::endl; 
+    return false; 
+  }
+
+  return true; 
+}
+
+bool mediator::Server::_isAuthenticating(int sock){
+  std::lock_guard<std::mutex> lck(_mutex);
+  return std::find(_authenticating.begin(), _authenticating.end(), sock) !=
+         _authenticating.end();
 }

@@ -13,6 +13,7 @@ Server class declarations
 #define PORT_SERVER 54700
 #include <map>
 #include <set>
+#include <mutex>
 #include "messages.h"
 
 namespace turbobeep {
@@ -44,7 +45,7 @@ public:
   ~Server();
   int initServer();
   void runServer();
-  void readBody(int sock, uint32g size,payload::packet *packet); 
+  bool authenticate(int sock, payload::packet_Payload &payload);
 
 private:
   void _updatePeerInfo(std::string const &user, std::string const &peer);
@@ -53,11 +54,17 @@ private:
   void _readyToP2P(int const &socket);
   void _findPeerInformation(payload::packet_Payload& payload, int sock);
 
+  bool _isAuthenticating(int sock); 
+
   int _listening;
   fd_set _master;
   std::map<std::string, userInfo> _userDescriptor;
   std::uint16_t _serverPort;
   std::unique_ptr<messages::ProtoBuf> _protoHandle; 
+  std::vector<int> _authenticating;  // Users currently authenticating
+  std::vector<int> _needAuthentication;  // Users currently authenticating
+  std::mutex _mutex;
+  std::vector<std::thread> _t; 
 
   friend mediator::TestServer;
 };
