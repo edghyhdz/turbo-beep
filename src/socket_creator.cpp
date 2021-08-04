@@ -10,7 +10,7 @@ using namespace turbobeep;
 // Connect and hash keys and so
 p2p::Socket::Socket(char *&ipAddress, char *&portNum, std::string flag, std::string pathKeyPair,
          std::string pathPeerPublicKey)
-    : _connectionOpen(false) {
+    : _connectionOpen(false), _needsAuth(true) {
 
   _protoHandle = std::make_unique<messages::ProtoBuf>(pathKeyPair, pathPeerPublicKey);
   _myInfo.userName = ""; 
@@ -37,7 +37,7 @@ p2p::Socket::Socket(char *&ipAddress, char *&portNum, std::string flag, std::str
 // Connect to the server upon socket creation
 p2p::Socket::Socket(char *&ipAddress, char *&portNum, std::string userName,
                std::string peerName)
-    : _connectionOpen(false) {
+    : _connectionOpen(false), _needsAuth(false){
 
   _protoHandle = std::make_unique<messages::ProtoBuf>(); 
   _myInfo.userName = userName; 
@@ -67,40 +67,52 @@ p2p::Socket::~Socket() {
  * Waits for instructions from the server, related to info of peer to connect to
  */
 void p2p::Socket::_listenToServer() {
-  int res;
-  char buffer[128];
+  if (!_needsAuth) {
+    // char buffer[128];
 
-  do {
-    memset(buffer, 0, 128);
-    int bytesReceived = recv(_sockFD, buffer, 128, 0);
+    do {
+      std::string recvMessage;
+      if (!_protoHandle->receiveMessage(_sockFD, &recvMessage)) {
+        throw std::runtime_error(
+            "Error receiving message. Connection closed by server");
+      } else {
+        // Server sent peer's ip and port
+        std::string delimiter{":"};
+        if (recvMessage.find(delimiter) != std::string::npos) {
+          size_t pos = 0;
 
-    if (bytesReceived == 0) {
-      throw std::runtime_error(
-          "Error receiving message. Connection closed by server");
-    } else {
-      std::ostringstream ss;
-      ss << buffer;
-      std::string s = ss.str();
-      std::cout << "Server msg: " << s << std::endl;
-
-      // Server sent peer's ip and port
-      std::string delimiter{":"};
-      if (s.find(delimiter) != std::string::npos) {
-        size_t pos = 0;
-
-        while ((pos = s.find(delimiter)) != std::string::npos) {
-          _peerIpAddress = s.substr(0, pos);
-          s.erase(0, pos + delimiter.length());
+          while ((pos = recvMessage.find(delimiter)) != std::string::npos) {
+            _peerIpAddress = recvMessage.substr(0, pos);
+            recvMessage.erase(0, pos + delimiter.length());
+          }
+          _peerPort = stoi(recvMessage);
+          break;
         }
-        _peerPort = stoi(s);
-        break;
       }
-    }
-  } while (true);
+    } while (true);
 
-  // Notify so that connectToServer() can return
-  std::lock_guard<std::mutex> lck(_mutex);
-  this->_cond.notify_one();
+    // Notify so that connectToServer() can return
+    std::lock_guard<std::mutex> lck(_mutex);
+    this->_cond.notify_one();
+
+  } else {
+    do {
+      payload::packet packet;
+      if (!_protoHandle->receiveMessage(_sockFD, &packet)){
+        throw std::runtime_error(
+            "Error receiving message. Connection closed by server");
+      }
+      auto *payload = packet.mutable_payload(); 
+      auto *crypto = payload->mutable_crypto(); 
+      std::cout << "Received from server: "<< crypto->nonce() << std::endl; 
+      std::string encryptedNonce = _protoHandle->signString(crypto->nonce());
+      std::cout << "Encrypted nonce: " << encryptedNonce << std::endl; 
+    } while (true);
+  }
+
+  // // Notify so that connectToServer() can return
+  // std::lock_guard<std::mutex> lck(_mutex);
+  // this->_cond.notify_one();
 }
 
 /**
@@ -173,47 +185,21 @@ void p2p::Socket::_connectToServer() {
 }
 
 /**
- * Sends first message to server to either begin authentication or to wait for
- * peer to connect. Server receives peer (client) information and to whom it
- * wants to connect to
- *
- * @param mType payload message type - used to tell if user wants to
- * authenticate
- */
-void p2p::Socket::_sendMessage(payload::packet::MessageTypes &mType){
-
-  int size; 
-  payload::packet packet; 
-
-  // Add information to the packet
-  messages::ProtoBuf::addUserInfo(&size, &packet, myInfo(), mType);
-
-  char *pkt = new char[size];
-  array_output_stream aos(pkt, size);
-  output_stream *coded_output =
-      new google::protobuf::io::CodedOutputStream(&aos);
-
-  // Serialize the message
-  messages::ProtoBuf::serializeMessage(coded_output, packet); 
-
-  // Send serialized packet
-  send(_sockFD, (void *)pkt, coded_output->ByteCount(), 0);
-  
-  delete[] pkt;
-  delete coded_output; 
-}
-
-/**
  * Public method implementation of _connectToServer.
  * Including also `_cond` to wait for _listenToServer() to retrieve peer port
  * and ip address. 
  * After that this method will return
  */
 void p2p::Socket::connectToServer(payload::packet::MessageTypes &mType) {
+  payload::packet packet; 
   _connectToServer();
 
   // After connecting to the server, send message
-  _sendMessage(mType); 
+  int size; 
+
+  // Add information to the packet and send message
+  messages::ProtoBuf::addUserInfo(&size, &packet, myInfo(), mType);
+  _protoHandle->sendMessage(size, _sockFD, packet);
 
   // wait until other client has connected
   std::unique_lock<std::mutex> lck(_mutex);
