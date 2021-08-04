@@ -23,6 +23,8 @@ public:
   ProtoBuf(){};
   ProtoBuf(std::string keyPair, std::string peerPublicKey)
       : RSA(keyPair, peerPublicKey){};
+    
+  static long getTimeStamp(); 
   static void addUserInfo(int *size, payload::packet *packet,
                           p2p::myInfo const &myInfo,
                           payload::packet::MessageTypes &mType);
@@ -32,6 +34,10 @@ public:
   uint32g readHeader(char *buffer);
   void deserializeMessage(payload::packet *packet, char *buffer,
                                  uint32g size);
+  
+  void readBody(int sock, uint32g size, payload::packet *packet);
+  void sendMessage(int size, int sock, payload::packet &packet);
+  bool receiveMessage(int sock, payload::packet *packet); 
 
 private:
   std::string _publicKey;

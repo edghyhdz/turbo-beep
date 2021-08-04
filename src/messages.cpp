@@ -1,8 +1,18 @@
 #include "messages.h"
+#include <sys/socket.h>
+#include <iostream>
+
 
 using namespace turbobeep;
 
-// messages::ProtoBuf::ProtoBuf(std::string keyPair, std::string peerPublicKey) {}
+
+// Generates current timestamp
+long messages::ProtoBuf::getTimeStamp(){
+  const auto timeStamp = std::chrono::system_clock::now();
+  return std::chrono::duration_cast<std::chrono::milliseconds>(
+                timeStamp.time_since_epoch())
+                .count();
+}
 
 /**
  * Serializes message packet after having added the data with
@@ -92,4 +102,65 @@ void messages::ProtoBuf::deserializeMessage(payload::packet *packet, char *buffe
   // Once the embedded message has been parsed, PopLimit() is called to undo the
   // limit
   coded_input.PopLimit(msgLimit);
+}
+
+/**
+ * Read protobuf message body.
+ * Deserializes sent package from client
+ * 
+ * @param sock peer socket
+ * @param size size of the message as given by messages::Receive::readHeader()
+ * @param[in, out] packet protobuf packet, containing payload to be deserialized
+ */
+void messages::ProtoBuf::readBody(int sock, uint32g size, payload::packet *packet){
+  int bytecount;
+  char buffer[size + 4];
+  bytecount = recv(sock, (void *)buffer, 4 + size, 0);
+  this->deserializeMessage(packet, buffer, size);
+}
+
+/**
+ * Sends protobuf message
+ *
+ * @param size buffer message size plus 4 bytes (magic number to help get all
+ * message size)
+ * @param sock user socket to send message to
+ * @param packet protobuf payload packet
+ */
+void messages::ProtoBuf::sendMessage(int size, int sock, payload::packet &packet){
+
+  char *pkt = new char[size];
+  array_output_stream aos(pkt, size);
+  output_stream *coded_output = new output_stream(&aos);
+
+  // Serialize the message
+  messages::ProtoBuf::serializeMessage(coded_output, packet);
+
+  // Send serialized packet
+  send(sock, (void *)pkt, coded_output->ByteCount(), 0);
+
+  delete[] pkt;
+  delete coded_output;
+}
+
+/**
+ * Receives protobuf message.
+ * 
+ * @param sock user socket from which we receive message
+ * @param[in, out] packet protobuf payload packet to write incoming message to
+ */
+bool messages::ProtoBuf::receiveMessage(int sock, payload::packet *packet){
+  char buffer[4];
+  int bytesIn; 
+  memset(buffer, '\0', 4);
+
+  // Peek into the socket and get the packet size
+  if ((bytesIn = recv(sock, buffer, 4, MSG_PEEK)) <= 0) {
+    return false;
+  } else {
+    if (bytesIn > 0) {
+      (void)this->readBody(sock, this->readHeader(buffer), packet);
+      return true; 
+    }
+  }
 }
