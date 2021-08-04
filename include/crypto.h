@@ -23,7 +23,6 @@ class RSA {
 public:
   RSA(){};
   RSA(std::string keyPairPath, std::string peerPublicKeyPath); 
-  // RSA(std::string myKey, std::string peerKey);
   std::string const publicKey() { return _publicKey; }
   std::string const peerPublicKey() { return _peerPublicKey; }
   std::string const signString(const std::string &message);
