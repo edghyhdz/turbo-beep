@@ -1,7 +1,7 @@
 #include "messages.h"
 #include <sys/socket.h>
 #include <iostream>
-
+#include <sstream>
 
 using namespace turbobeep;
 
@@ -160,4 +160,22 @@ bool messages::ProtoBuf::receiveMessage(int sock, payload::packet *packet){
   }
   (void)this->readBody(sock, this->readHeader(buffer), packet);
   return true;
+}
+
+/**
+ * Receives a non serialized message
+ */
+bool messages::ProtoBuf::receiveMessage(int socket, std::string *recvMsg) {
+  char buffer[128];
+  memset(buffer, 0, 128);
+  int bytesReceived = recv(socket, buffer, 128, 0);
+
+  if (bytesReceived == 0) {
+    return false;
+  }
+  std::ostringstream ss;
+  ss << buffer;
+  *recvMsg = ss.str();
+  std::cout << "Server msg: " << *recvMsg << std::endl;
+  return true; 
 }
