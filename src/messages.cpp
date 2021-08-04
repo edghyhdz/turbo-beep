@@ -157,10 +157,7 @@ bool messages::ProtoBuf::receiveMessage(int sock, payload::packet *packet){
   // Peek into the socket and get the packet size
   if ((bytesIn = recv(sock, buffer, 4, MSG_PEEK)) <= 0) {
     return false;
-  } else {
-    if (bytesIn > 0) {
-      (void)this->readBody(sock, this->readHeader(buffer), packet);
-      return true; 
-    }
   }
+  (void)this->readBody(sock, this->readHeader(buffer), packet);
+  return true;
 }
