@@ -20,12 +20,8 @@ p2p::Socket::Socket(char *&ipAddress, char *&portNum, std::string flag, std::str
   _myInfo.peerHash = _protoHandle->sha1(_protoHandle->peerPublicKey(),
                                         _protoHandle->peerPublicKey().length());
 
-  std::cout << "My hash: \n" << _myInfo.myHash << std::endl;
-  std::cout << "Peer hash: \n" << _myInfo.peerHash << std::endl;
-
   // Get own ip address
   _setIpAddress();
-  std::cout << ipAddress << ":" << portNum << std::endl;
   memset(&this->_hints, 0, sizeof(_hints));
   _hints.ai_family = AF_UNSPEC;
   _hints.ai_socktype = SOCK_STREAM;
@@ -60,16 +56,18 @@ p2p::Socket::~Socket() {
    _t.join(); 
 }
 
-// TODO: This implementation will change, since this is just a feasibility
-// example
 /**
  * Listens to server, started on a thread.
  * Waits for instructions from the server, related to info of peer to connect to
+ *
+ * It can either send basic information depending on how the peer wants to
+ * connect to the other peer. Either by providing the name, or the hashed key.
+ * If peer provides the hashed key, then it will follow up a challenge/response
+ * authentication step with the server
  */
 void p2p::Socket::_listenToServer() {
+  // If it does not need to authenticate
   if (!_needsAuth) {
-    // char buffer[128];
-
     do {
       std::string recvMessage;
       if (!_protoHandle->receiveMessage(_sockFD, &recvMessage)) {
@@ -91,28 +89,41 @@ void p2p::Socket::_listenToServer() {
       }
     } while (true);
 
-    // Notify so that connectToServer() can return
-    std::lock_guard<std::mutex> lck(_mutex);
-    this->_cond.notify_one();
-
   } else {
-    do {
-      payload::packet packet;
-      if (!_protoHandle->receiveMessage(_sockFD, &packet)){
-        throw std::runtime_error(
-            "Error receiving message. Connection closed by server");
-      }
-      auto *payload = packet.mutable_payload(); 
-      auto *crypto = payload->mutable_crypto(); 
-      std::cout << "Received from server: "<< crypto->nonce() << std::endl; 
-      std::string encryptedNonce = _protoHandle->signString(crypto->nonce());
-      std::cout << "Encrypted nonce: " << encryptedNonce << std::endl; 
-    } while (true);
+    
+    // Authentication needed, challenge/response authentication steps
+    int size;
+    payload::packet packet;
+    if (!_protoHandle->receiveMessage(_sockFD, &packet)) {
+      throw std::runtime_error(
+          "Error receiving message. Connection closed by server");
+    }
+    auto *payload = packet.mutable_payload();
+    auto *crypto = payload->mutable_crypto();
+
+    // Message should contain a type CHALLENGE and the nonce to encrypt
+    // std::cout << "[PEER] Nonce: " << crypto->nonce() << std::endl;
+    std::string encryptedNonce = _protoHandle->signString(crypto->nonce());
+
+    // Respond to challenge
+    packet.set_time_stamp(_protoHandle->getTimeStamp());
+    payload->set_type(payload::packet_MessageTypes_RESPONSE);
+    crypto->set_encryptednonce(encryptedNonce);
+    size = packet.ByteSize() + 4;
+
+    // Send encrypted nonce for server to verify
+    _protoHandle->sendMessage(size, _sockFD, packet);
+
+    // Upon successfully authenticating, server will keep connection open
+    // Wait for server to send peer information
+    if (!_protoHandle->receiveMessage(_sockFD, &packet)) {
+      throw std::runtime_error("Connection closed by server");
+    }
   }
 
-  // // Notify so that connectToServer() can return
-  // std::lock_guard<std::mutex> lck(_mutex);
-  // this->_cond.notify_one();
+  // Notify so that connectToServer() can return
+  std::lock_guard<std::mutex> lck(_mutex);
+  this->_cond.notify_one();
 }
 
 /**
