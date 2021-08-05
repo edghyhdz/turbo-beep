@@ -203,3 +203,24 @@ void crypto::RSA::_loadKeys(std::string &keyPath, std::string &peerPath) {
     this->_peerPublicKey = peerKey;
   }
 }
+
+/**
+ * Used only for testing the mediator. You might want to implement a more
+ * realistic way of having the peer public keys stored on a db or so.
+ * 
+ * @param keyPath path to connecting peer public key
+ */
+std::string const crypto::RSA::loadPublicKey(std::string &keyPath){
+  std::ifstream sKeyRaw(keyPath); 
+  std::string publicKey;
+  if (sKeyRaw) {
+    std::string line;
+    while (getline(sKeyRaw, line)) {
+      if (line == "")
+        continue;
+      publicKey += line + "\n";
+    }
+    return publicKey.substr(0, publicKey.size() - 1);
+  }
+  return ""; 
+}

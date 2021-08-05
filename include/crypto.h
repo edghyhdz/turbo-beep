@@ -31,6 +31,9 @@ public:
   std::string const generateNonce();
   std::string const sha1(const std::string &input, unsigned long length);
 
+  // Included pretty much for testing mediator
+  std::string const loadPublicKey(std::string &keyPath); 
+
 private:
   void _loadKeys(std::string &keyPairPath, std::string &peerKeyPath);
   std::string _secretKey;
