@@ -28,14 +28,13 @@ public:
   static void addUserInfo(int *size, payload::packet *packet,
                           p2p::myInfo const &myInfo,
                           payload::packet::MessageTypes &mType);
-  static void serializeMessage(output_stream *coded_output,
-                               payload::packet &packet);
+  void serializeMessage(output_stream *coded_output, payload::packet &packet);
 
   uint32g readHeader(char *buffer);
-  void deserializeMessage(payload::packet *packet, char *buffer,
+  bool deserializeMessage(payload::packet *packet, char *buffer,
                                  uint32g size);
   
-  void readBody(int sock, uint32g size, payload::packet *packet);
+  bool readBody(int sock, uint32g size, payload::packet *packet);
   void sendMessage(int size, int sock, payload::packet &packet);
   bool receiveMessage(int sock, payload::packet *packet); 
   bool receiveMessage(int sock, std::string *recvMsg);

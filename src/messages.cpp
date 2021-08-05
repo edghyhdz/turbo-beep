@@ -86,7 +86,7 @@ uint32g messages::ProtoBuf::readHeader(char *buffer) {
  * @param buffer buffer containing data
  * @param size message size
  */
-void messages::ProtoBuf::deserializeMessage(payload::packet *packet, char *buffer, uint32g size){
+bool messages::ProtoBuf::deserializeMessage(payload::packet *packet, char *buffer, uint32g size){
   // Assign ArrayInputStream with enough memory
   array_input_stream ais(buffer, size + 4);
   input_stream coded_input(&ais);
@@ -98,10 +98,13 @@ void messages::ProtoBuf::deserializeMessage(payload::packet *packet, char *buffe
   
   input_stream::Limit msgLimit = coded_input.PushLimit(size);
   // De-Serialize
-  packet->ParseFromCodedStream(&coded_input);
+  if (!packet->ParseFromCodedStream(&coded_input)){
+    return false;
+  }
   // Once the embedded message has been parsed, PopLimit() is called to undo the
   // limit
   coded_input.PopLimit(msgLimit);
+  return true; 
 }
 
 /**
@@ -112,11 +115,11 @@ void messages::ProtoBuf::deserializeMessage(payload::packet *packet, char *buffe
  * @param size size of the message as given by messages::Receive::readHeader()
  * @param[in, out] packet protobuf packet, containing payload to be deserialized
  */
-void messages::ProtoBuf::readBody(int sock, uint32g size, payload::packet *packet){
+bool messages::ProtoBuf::readBody(int sock, uint32g size, payload::packet *packet){
   int bytecount;
   char buffer[size + 4];
   bytecount = recv(sock, (void *)buffer, 4 + size, 0);
-  this->deserializeMessage(packet, buffer, size);
+  return this->deserializeMessage(packet, buffer, size);
 }
 
 /**
@@ -134,7 +137,7 @@ void messages::ProtoBuf::sendMessage(int size, int sock, payload::packet &packet
   output_stream *coded_output = new output_stream(&aos);
 
   // Serialize the message
-  messages::ProtoBuf::serializeMessage(coded_output, packet);
+  this->serializeMessage(coded_output, packet);
 
   // Send serialized packet
   send(sock, (void *)pkt, coded_output->ByteCount(), 0);
@@ -158,8 +161,7 @@ bool messages::ProtoBuf::receiveMessage(int sock, payload::packet *packet){
   if ((bytesIn = recv(sock, buffer, 4, MSG_PEEK)) <= 0) {
     return false;
   }
-  (void)this->readBody(sock, this->readHeader(buffer), packet);
-  return true;
+  return this->readBody(sock, this->readHeader(buffer), packet);
 }
 
 /**
