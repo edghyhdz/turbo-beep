@@ -181,3 +181,28 @@ bool messages::ProtoBuf::receiveMessage(int socket, std::string *recvMsg) {
   std::cout << "Server msg: " << *recvMsg << std::endl;
   return true; 
 }
+
+/**
+ * Add data from other peer. 
+ * 
+ * @param[in, out] size byte size of message
+ * @param peerIpAddress other peer ip address
+ * @param peerPort other peer port
+ */
+payload::packet messages::ProtoBuf::setPeerData(int *size,
+                                                 std::string &peerIpAddress,
+                                                 std::uint16_t &peerPort) {
+  payload::packet packet;
+  packet.set_time_stamp(this->getTimeStamp());
+  auto *payload = packet.mutable_payload();
+  payload->set_type(payload::packet_MessageTypes_SUCCESS);
+
+  auto *otherPeerInfo = payload->mutable_otherpeerinfo();
+  otherPeerInfo->set_peeripaddress(peerIpAddress);
+  otherPeerInfo->set_peerport(peerPort);
+
+  // Get packet size - including magic number
+  *size = packet.ByteSize() + 4;
+
+  return packet; 
+}

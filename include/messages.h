@@ -39,6 +39,9 @@ public:
   bool receiveMessage(int sock, payload::packet *packet); 
   bool receiveMessage(int sock, std::string *recvMsg);
 
+  payload::packet setPeerData(int *size, std::string &peerIpAddress,
+                               std::uint16_t &peerPort);
+
 private:
   std::string _publicKey;
   std::string _privateKey;
