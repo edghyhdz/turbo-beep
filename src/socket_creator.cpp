@@ -90,7 +90,6 @@ void p2p::Socket::_listenToServer() {
     } while (true);
 
   } else {
-    
     // Authentication needed, challenge/response authentication steps
     int size;
     payload::packet packet;
@@ -102,7 +101,6 @@ void p2p::Socket::_listenToServer() {
     auto *crypto = payload->mutable_crypto();
 
     // Message should contain a type CHALLENGE and the nonce to encrypt
-    // std::cout << "[PEER] Nonce: " << crypto->nonce() << std::endl;
     std::string encryptedNonce = _protoHandle->signString(crypto->nonce());
 
     // Respond to challenge
@@ -119,6 +117,16 @@ void p2p::Socket::_listenToServer() {
     if (!_protoHandle->receiveMessage(_sockFD, &packet)) {
       throw std::runtime_error("Connection closed by server");
     }
+
+    auto *success = packet.mutable_payload(); 
+
+    if (success->type() != payload::packet_MessageTypes_SUCCESS){
+      throw std::runtime_error("Could not successfully authenticate"); 
+    }
+
+    auto *otherPeerInfo = success->mutable_otherpeerinfo(); 
+    _peerIpAddress = otherPeerInfo->peeripaddress();
+    _peerPort = otherPeerInfo->peerport();
   }
 
   // Notify so that connectToServer() can return
