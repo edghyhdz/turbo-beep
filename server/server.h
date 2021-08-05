@@ -43,7 +43,7 @@ class Server {
 public:
   Server(std::uint16_t port = 54700);
   ~Server();
-  int initServer();
+  void initServer();
   void runServer();
   bool authenticate(int sock, payload::packet_Payload &payload);
 

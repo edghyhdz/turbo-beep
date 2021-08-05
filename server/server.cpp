@@ -30,7 +30,7 @@ mediator::Server::~Server() {
   close(_listening);
 }
 
-int mediator::Server::initServer() {
+void mediator::Server::initServer() {
   this->_listening = socket(AF_INET, SOCK_STREAM, 0);
   int value{1};
   if (_listening == -1) {
@@ -68,7 +68,6 @@ void mediator::Server::_updatePeerInfo(std::string const &user, std::string cons
   _userDescriptor.at(user).canConnect = true;
   _userDescriptor.at(user).peerInfo.ipAddress = _userDescriptor.at(peer).ipAddress;
   _userDescriptor.at(user).peerInfo.port = _userDescriptor.at(peer).port;;
-
 }
 
 /**
@@ -148,29 +147,47 @@ void mediator::Server::_readyToP2P(int const &socket) {
 void mediator::Server::_findPeerInformation(payload::packet_Payload &payload, int sock){
   auto *peerInfo = payload.mutable_peerinfo();
   auto *crypto = payload.mutable_crypto();
+  auto mType = payload.type(); 
 
-  if (payload::packet::PEER_INFO == payload.type()) {
-    if (_userDescriptor.find(peerInfo->username()) == _userDescriptor.end()) {
-      // If username not found -> add it to map
-      userInfo newUser;
-      newUser.ipAddress = peerInfo->ipaddress();
-      newUser.port = peerInfo->port(); 
-      newUser.name = peerInfo->username();
-      newUser.socket = sock;
-      newUser.peerInfo.name = peerInfo->peername(); 
-      _userDescriptor.insert(std::make_pair(peerInfo->username(), newUser));
-      _findPeer(peerInfo->username(), peerInfo->peername());
-    }
-  }
-  else if (payload::packet::ADVERTISE == payload.type()){
-    std::cout << "Peer1 hashed key: " << crypto->hashedkey() << std::endl;
-    std::cout << "Peer2 hashed key: " << crypto->peerhashedkey() << std::endl;
-  }
-  else {
-    std::cout << "Different type of message" << std::endl; 
+  if (_userDescriptor.find(peerInfo->username()) == _userDescriptor.end()) {
+    userInfo newUser;
+    std::string userName, peerName;
+
+    // Message type can only be PEER_INFO or ADVERTISE at this point
+    // Depending mType, userName and peerName will be either the provided name
+    // or hashed keys
+    userName = mType == payload::packet::ADVERTISE ? crypto->hashedkey()
+                                                   : peerInfo->username();
+    peerName = mType == payload::packet::ADVERTISE ? crypto->peerhashedkey()
+                                                   : peerInfo->peername();
+
+    std::cout << "Peer1 user name: " << userName << std::endl;
+    std::cout << "Peer2 username: " << peerName << std::endl;
+
+    newUser.ipAddress = peerInfo->ipaddress();
+    newUser.port = peerInfo->port();
+    newUser.socket = sock;
+    newUser.name = userName;
+    newUser.peerInfo.name = peerName;
+    _userDescriptor.insert(std::make_pair(userName, newUser));
+    _findPeer(userName, peerName);
   }
 }
 
+/**
+ * Run server waiting for new peers to connect.
+ * 
+ * There are two accepted cases:
+ * 
+ *  1. Either the peer provides the name of the peer
+ *  to connect to, in which case the server will just wait and find the other
+ *  name to connect.
+ *
+ *  2. Peer advertises including its own hashed public key plus that of the peer
+ *  it intends to connect to.
+ *
+ * In both cases the server will try and find the peer to connect to
+ */
 void mediator::Server::runServer() {
   while (true) {
     // copies all
@@ -184,32 +201,35 @@ void mediator::Server::runServer() {
       if (sock == _listening) {
         // Accept new connection
         auto client = accept(_listening, nullptr, nullptr);
-        // Add new connection to the list of connected clients
         FD_SET(client, &_master);
       } else {
-        payload::packet packet; 
-
+        payload::packet packet;
         // Check if there is a message
-        if (!_protoHandle->receiveMessage(sock, &packet)){
+        if (!_protoHandle->receiveMessage(sock, &packet)) {
           close(sock);
           FD_CLR(sock, &_master);
           _removePeer(sock);
         } else {
           auto *payload = packet.mutable_payload();
+          // Message type -> ADVERTISE then authenticate
           if (payload->type() == payload::packet::ADVERTISE) {
-            _needAuthentication.push_back(sock);
-            // TODO:
-            // Authentication happens here. Check if  this needs to be started
-            // via threads If so then use mutex to avoid data races
+            // If authentication fails, close connection with client
             if (!this->authenticate(sock, *payload)) {
               std::cout << "Closing socket" << std::endl;
               close(sock);
               FD_CLR(sock, &_master);
+            } else {
+              _findPeerInformation(*payload, sock);
             }
-          }
-          if (std::find(_needAuthentication.begin(), _needAuthentication.end(),
-                        sock) == _needAuthentication.end()) {
+          } else if ((payload->type() == payload::packet::PEER_INFO)) {
+            // PEER_INFO is used only for non authentication and mainly as a
+            // first example purpose of p2p connection
             _findPeerInformation(*payload, sock);
+          } else {
+            // If peer is not using the official client
+            close(sock);
+            FD_CLR(sock, &_master);
+            _removePeer(sock);
           }
         }
         _readyToP2P(sock);
@@ -252,16 +272,21 @@ bool mediator::Server::authenticate(int sock, payload::packet_Payload &payload){
     return false; 
   }
 
-  // Get encrypted nonce sent by peer
+  // Get encrypted nonce sent by peer and decrypt it to compare
   pLoad = response.mutable_payload(); 
   crypto = pLoad->mutable_crypto(); 
-  std::string encryptedNonce = crypto->encryptednonce(); 
+  std::string encryptedNonce = crypto->encryptednonce();
+  std::string key{""};
 
-  if (encryptedNonce != "decryptedNonce"){
+  std::string decryptedNonce = _protoHandle->decryptWithPublicKey(encryptedNonce, key);
+  std::cout << "[SERVER]: Decrypted nonce: " << decryptedNonce << std::endl; 
+
+  if (nonce != decryptedNonce){
     std::cout << "Could not authenticate... bye bye" << std::endl; 
     return false; 
   }
 
+  std::cout << "Successfully authenticated" << std::endl; 
   return true; 
 }
 
