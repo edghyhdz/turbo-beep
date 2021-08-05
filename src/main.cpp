@@ -13,7 +13,6 @@ int main(int argc, char **argv) {
     auto socket = p2p::Socket(ipAddress, portNum, userName, theirUserName);
     // Wait for method to return - waiting for other peer
     socket.connectToServer(mTypePI);
-
     // After other peer has connected -> start trying to connect to peer
     socket.connectToPeer();
     
@@ -26,6 +25,8 @@ int main(int argc, char **argv) {
 
     // Wait for method to return - waiting for other peer
     socket.connectToServer(mTypeAdv);
+    // After other peer has connected -> start trying to connect to peer
+    socket.connectToPeer();
 
   } else {
     throw std::runtime_error("Not enough arguments to start ..."); 
