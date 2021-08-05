@@ -4,6 +4,7 @@
 #include "socket_creator.h"
 #include "messages.h"
 #include <gtest/gtest.h>
+#include <memory>
 
 using namespace turbobeep; 
 
@@ -17,7 +18,9 @@ public:
   static void TearDownTestCase(){};
 
 protected:
-  p2p::Socket *_socket;
+  std::shared_ptr<p2p::Socket> _socket; 
+  std::shared_ptr<messages::ProtoBuf> _messageHandler; 
+  // p2p::Socket *_socket;
   int _size; 
   payload::packet _packet;
   char *_ipAddress;

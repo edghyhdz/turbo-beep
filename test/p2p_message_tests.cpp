@@ -13,8 +13,9 @@ P2PMessage::P2PMessage() {
   strcpy(_port, portStr.c_str());
   std::string userName{"peerOne"};
   std::string theirUserName{"peerTwo"};
-
-  _socket = new p2p::Socket(_ipAddress, _port, userName, theirUserName);
+  _socket = std::make_shared<p2p::Socket>(_ipAddress, _port, userName,
+                                          theirUserName);
+  _messageHandler = std::make_shared<messages::ProtoBuf>();                                           
 }
 
 P2PMessage::~P2PMessage() {}
@@ -72,7 +73,7 @@ TEST_F(P2PMessage, ProtobufferSerializationTestNoThrow) {
       new google::protobuf::io::CodedOutputStream(&aos);
 
   // Should serialize the message correctly
-  ASSERT_NO_THROW((void)messages::ProtoBuf::serializeMessage(coded_output, _packet));
+  ASSERT_NO_THROW((void)_messageHandler->serializeMessage(coded_output, _packet));
 
   // Remove overhead from protobuffer and add the 4-byte "magic number" that helps
   // use identify size of the packet
