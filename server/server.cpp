@@ -109,7 +109,7 @@ void mediator::Server::_removePeer(int const &socket) {
  *
  * @param[in] socket disconnected user's socket
  */
-void mediator::Server::_readyToP2P(int const &socket) {
+void mediator::Server::_readyToP2P(int const &socket, bool &isProto) {
 
   for (auto key_val : _userDescriptor) {
     if (socket == key_val.second.socket) {
@@ -128,8 +128,27 @@ void mediator::Server::_readyToP2P(int const &socket) {
             std::to_string(key_val.second.peerInfo.port);
 
         // Send peer information to other peer
-        send(peerSocket, ipAddressPeer.c_str(), ipAddressPeer.length() + 1, 0);
-        send(socket, ipAddressCl.c_str(), ipAddressCl.length() + 1, 0);
+        // Check if its a serialized protobuffer message
+        if (isProto){
+          int sizeP1, sizeP2;
+          payload::packet packetP1 = _protoHandle->setPeerData(
+              &sizeP1, _userDescriptor.at(peerName).peerInfo.ipAddress,
+              _userDescriptor.at(peerName).peerInfo.port);
+
+          payload::packet packetP2 = _protoHandle->setPeerData(
+              &sizeP2, key_val.second.peerInfo.ipAddress,
+              key_val.second.peerInfo.port);
+
+          // Send both peers the other peer's information
+          _protoHandle->sendMessage(sizeP1, peerSocket, packetP1);
+          _protoHandle->sendMessage(sizeP2, socket, packetP2);
+
+        } else {
+          // Non serialized data
+          send(peerSocket, ipAddressPeer.c_str(), ipAddressPeer.length() + 1,
+               0);
+          send(socket, ipAddressCl.c_str(), ipAddressCl.length() + 1, 0);
+        }
         break;
       }
     }
@@ -198,41 +217,39 @@ void mediator::Server::runServer() {
       if (!FD_ISSET(sock, &copy))
         continue;
 
+      // Accept new connection
       if (sock == _listening) {
-        // Accept new connection
         auto client = accept(_listening, nullptr, nullptr);
         FD_SET(client, &_master);
       } else {
+        bool isProto = false; 
         payload::packet packet;
         // Check if there is a message
-        if (!_protoHandle->receiveMessage(sock, &packet)) {
-          close(sock);
-          FD_CLR(sock, &_master);
-          _removePeer(sock);
-        } else {
+        if (_protoHandle->receiveMessage(sock, &packet)) {
           auto *payload = packet.mutable_payload();
-          // Message type -> ADVERTISE then authenticate
+          bool checkForPeer = false;
           if (payload->type() == payload::packet::ADVERTISE) {
             // If authentication fails, close connection with client
-            if (!this->authenticate(sock, *payload)) {
-              std::cout << "Closing socket" << std::endl;
-              close(sock);
-              FD_CLR(sock, &_master);
-            } else {
-              _findPeerInformation(*payload, sock);
-            }
-          } else if ((payload->type() == payload::packet::PEER_INFO)) {
-            // PEER_INFO is used only for non authentication and mainly as a
-            // first example purpose of p2p connection
+            isProto = true;
+            checkForPeer = this->authenticate(sock, *payload);
+          } else if (payload->type() == payload::packet::PEER_INFO) {
+            // PEER_INFO requires no authentication
+            checkForPeer = true;
+          }
+          if (checkForPeer) {
             _findPeerInformation(*payload, sock);
           } else {
-            // If peer is not using the official client
             close(sock);
             FD_CLR(sock, &_master);
             _removePeer(sock);
           }
+        } else {
+          // No message/ or peer not using official client
+          close(sock);
+          FD_CLR(sock, &_master);
+          _removePeer(sock);
         }
-        _readyToP2P(sock);
+        _readyToP2P(sock, isProto);
       }
     }
   }
@@ -283,6 +300,7 @@ bool mediator::Server::authenticate(int sock, payload::packet_Payload &payload){
   // NOTE: This is just for testing. You may want to add another way to fetch
   // peer's public keys
   std::string keyPath = "./certs/" + hashedKey + "/public.pem"; 
+  std::cout << "Path: " << keyPath << std::endl; 
   std::string key = _protoHandle->loadPublicKey(keyPath);
 
   std::string decryptedNonce = _protoHandle->decryptWithPublicKey(encryptedNonce, key);
