@@ -248,12 +248,15 @@ bool mediator::Server::authenticate(int sock, payload::packet_Payload &payload){
   int size;
   payload::packet challenge, response;
 
+  auto *cryptoUser = payload.mutable_crypto();
+  std::string hashedKey = cryptoUser->hashedkey();
+
   // Generate nonce to send for challenge request
   auto nonce = _protoHandle->generateNonce();
 
   // Challenge packet
-  auto *pLoad = challenge.mutable_payload(); 
-  auto *crypto = pLoad->mutable_crypto(); 
+  auto *pLoad = challenge.mutable_payload();
+  auto *crypto = pLoad->mutable_crypto();
 
   // Set params to packet payload
   challenge.set_time_stamp(messages::ProtoBuf::getTimeStamp());
@@ -276,7 +279,11 @@ bool mediator::Server::authenticate(int sock, payload::packet_Payload &payload){
   pLoad = response.mutable_payload(); 
   crypto = pLoad->mutable_crypto(); 
   std::string encryptedNonce = crypto->encryptednonce();
-  std::string key{""};
+
+  // NOTE: This is just for testing. You may want to add another way to fetch
+  // peer's public keys
+  std::string keyPath = "./certs/" + hashedKey + "/public.pem"; 
+  std::string key = _protoHandle->loadPublicKey(keyPath);
 
   std::string decryptedNonce = _protoHandle->decryptWithPublicKey(encryptedNonce, key);
   std::cout << "[SERVER]: Decrypted nonce: " << decryptedNonce << std::endl; 
