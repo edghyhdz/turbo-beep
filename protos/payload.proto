@@ -10,12 +10,14 @@ message packet {
       ADVERTISE = 1; 
       CHALLENGE = 2; 
       RESPONSE = 3; 
+      SUCCESS = 4;
   }
 
   message Payload {
       required MessageTypes type = 1 [default = PEER_INFO];
       optional PeerInfo peerInfo = 2;
       optional Crypto crypto = 3; 
+      optional OtherPeerInfo otherPeerInfo = 4;
   }
 
   message PeerInfo {
@@ -33,6 +35,11 @@ message packet {
       optional bytes encryptedMsg = 5;
       optional string nonce = 6;
       optional bytes encryptedNonce = 7;   
+  }
+
+  message OtherPeerInfo {
+      required uint32 peerPort = 1; 
+      required string peerIpAddress = 2; 
   }
 
   required Payload payload = 2; 
