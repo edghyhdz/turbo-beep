@@ -14,6 +14,8 @@ public:
   void TearDown() override;
   static void SetUpTestCase(){};
   static void TearDownTestCase(){};
+private:
+  std::string _certPath;
 
 protected:
   std::shared_ptr<crypto::RSA> _crypto; 
