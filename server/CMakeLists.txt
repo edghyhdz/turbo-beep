@@ -7,6 +7,7 @@ find_package(Threads REQUIRED)
 
 add_executable(server
     ../include/messages.h
+    ../include/vars.h
     ../src/messages.cpp
     main.cpp
 )
