@@ -11,6 +11,7 @@ find_package(Protobuf REQUIRED)
 add_executable(tests 
     ../include/messages.h
     ../src/messages.cpp
+    ../include/vars.h
     include/p2p_tests.h
     include/p2p_message_tests.h
     include/server_tests.h
