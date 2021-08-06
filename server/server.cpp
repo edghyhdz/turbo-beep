@@ -13,6 +13,7 @@
 #include <vector>
 #include <algorithm>
 #include <thread>
+#include "vars.h"
 
 /*****************************************************************************
  * Server class member definitions
@@ -180,9 +181,6 @@ void mediator::Server::_findPeerInformation(payload::packet_Payload &payload, in
     peerName = mType == payload::packet::ADVERTISE ? crypto->peerhashedkey()
                                                    : peerInfo->peername();
 
-    std::cout << "Peer1 user name: " << userName << std::endl;
-    std::cout << "Peer2 username: " << peerName << std::endl;
-
     newUser.ipAddress = peerInfo->ipaddress();
     newUser.port = peerInfo->port();
     newUser.socket = sock;
@@ -297,9 +295,11 @@ bool mediator::Server::authenticate(int sock, payload::packet_Payload &payload){
   crypto = pLoad->mutable_crypto(); 
   std::string encryptedNonce = crypto->encryptednonce();
 
-  // NOTE: This is just for testing. You may want to add another way to fetch
-  // peer's public keys
-  std::string keyPath = "./certs/" + hashedKey + "/public.pem"; 
+  // NOTE ------------------------------------------------------------------
+  // This is just for testing. You may want to add another way to fetch
+  // peer's public keys rather than by calling a folder with the public keys
+  std::string pathCert = CERTIFICATES_PATH; 
+  std::string keyPath = pathCert + hashedKey + "/public.pem"; 
   std::cout << "Path: " << keyPath << std::endl; 
   std::string key = _protoHandle->loadPublicKey(keyPath);
 
@@ -311,7 +311,7 @@ bool mediator::Server::authenticate(int sock, payload::packet_Payload &payload){
     return false; 
   }
 
-  std::cout << "Successfully authenticated" << std::endl; 
+  std::cout << "[SERVER]: Successfully authenticated" << std::endl; 
   return true; 
 }
 
