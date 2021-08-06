@@ -14,6 +14,16 @@ add_executable(p2p
     ${PROJECT_SOURCE_DIR}/src/main.cpp
 )
 
+# Pass CERTIFICATES_PATH variable to SetPath.cmake
+set(CERTIFICATES_PATH ${CMAKE_CURRENT_BINARY_DIR}/certs/)
+
+add_custom_command(TARGET p2p PRE_BUILD 
+        COMMAND ${CMAKE_COMMAND} 
+        -DCERTIFICATES_PATH=${CERTIFICATES_PATH} 
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/SetPath.cmake)
+
+file(COPY ${CMAKE_SOURCE_DIR}/certs DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 # Client library
 add_library(client
     ${PROJECT_SOURCE_DIR}/include/socket_creator.h
