@@ -25,7 +25,7 @@ public:
       : RSA(keyPair, peerPublicKey){};
     
   static long getTimeStamp(); 
-  static void addUserInfo(int *size, payload::packet *packet,
+  void addUserInfo(int *size, payload::packet *packet,
                           p2p::myInfo const &myInfo,
                           payload::packet::MessageTypes &mType);
   void serializeMessage(output_stream *coded_output, payload::packet &packet);
