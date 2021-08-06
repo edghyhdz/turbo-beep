@@ -18,6 +18,7 @@ void ServerFixture::SetUp() {
   payload::packet packetFirstPeer, packetSecondPeer; 
   std::string buffer;
   p2p::myInfo firstPeer, secondPeer; 
+  _messageHandler = std::make_shared<messages::ProtoBuf>();                                           
 
   // Add both peer information to struct
   setMyInfo(&firstPeer, "127.0.0.1", 1234, "FirstPeer", "SecondPeer");
@@ -25,8 +26,8 @@ void ServerFixture::SetUp() {
 
   // Add user information to packet
   auto mTypePI = payload::packet_MessageTypes_PEER_INFO;
-  messages::ProtoBuf::addUserInfo(&size, &packetFirstPeer, firstPeer, mTypePI);
-  messages::ProtoBuf::addUserInfo(&size, &packetSecondPeer, secondPeer, mTypePI);
+  _messageHandler->addUserInfo(&size, &packetFirstPeer, firstPeer, mTypePI);
+  _messageHandler->addUserInfo(&size, &packetSecondPeer, secondPeer, mTypePI);
 
   // Get payload from peerinfo
   auto * payloadP1 = packetFirstPeer.mutable_payload();
