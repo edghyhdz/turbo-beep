@@ -56,6 +56,10 @@ p2p::Socket::~Socket() {
    _t.join(); 
 }
 
+void p2p::Socket::close(){
+  ::close(_connFD); 
+}
+
 /**
  * Listens to server, started on a thread.
  * Waits for instructions from the server, related to info of peer to connect to
@@ -217,14 +221,14 @@ void p2p::Socket::connectToServer(payload::packet::MessageTypes &mType) {
   int size; 
 
   // Add information to the packet and send message
-  messages::ProtoBuf::addUserInfo(&size, &packet, myInfo(), mType);
+  _protoHandle->addUserInfo(&size, &packet, myInfo(), mType);
   _protoHandle->sendMessage(size, _sockFD, packet);
 
   // wait until other client has connected
   std::unique_lock<std::mutex> lck(_mutex);
   _cond.wait(lck);
 
-  std::cout << "Retrieved peer info: " << _peerIpAddress << ":" << _peerPort
+  std::cout << "[PEER]: Retrieved peer info: " << _peerIpAddress << ":" << _peerPort
             << ". Ready to connect to peer" << std::endl;
 }
 
@@ -257,8 +261,12 @@ void p2p::Socket::connectToPeer() {
       break;
   }
 
-  std::cout << "Connected ..." << std::endl;
+  std::cout << "[PEER]: Connected ..." << std::endl;
+  // Close server socket
   ::close(_sockFD);
+
+  // TODO: Authentication part with peer?
+
   std::string message =
       "Hello world from " + _peerIpAddress + ":" + std::to_string(_peerPort);
   strcpy(bufferSend, message.c_str());
@@ -273,6 +281,6 @@ void p2p::Socket::connectToPeer() {
     res = recv(_connFD, buffer, 4096, 0);
     if (res <= 0)
       throw std::runtime_error("read error");
-    std::cout << "Received message: " << buffer << std::endl;
+    std::cout << "[OTHER PEER]: Received message: " << buffer << std::endl;
   }
 }
