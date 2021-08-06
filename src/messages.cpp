@@ -65,17 +65,16 @@ void messages::ProtoBuf::serializeMessage(output_stream *coded_output,
 
 /**
  * Reads headers from packet
- * 
+ *
  * @param buffer packet buffer, to be later deserialized by
  * ProtoBuf::deserializeMessage
- * @returns the size of the message 
+ * @returns the size of the message
  */
 uint32g messages::ProtoBuf::readHeader(char *buffer) {
   uint32g size;
   array_input_stream ais(buffer, 4);
   input_stream coded_input(&ais);
   coded_input.ReadVarint32(&size); // Decode the HDR and get the size
-  // std::cout << "size of payload is " << size << std::endl;
   return size;
 }
 
@@ -95,16 +94,16 @@ bool messages::ProtoBuf::deserializeMessage(payload::packet *packet, char *buffe
   // After the message's length is read, PushLimit() is used to prevent the
   // CodedInputStream from reading beyond that length.Limits are used when
   // parsing length-delimited embedded messages
-  
   input_stream::Limit msgLimit = coded_input.PushLimit(size);
+
   // De-Serialize
-  if (!packet->ParseFromCodedStream(&coded_input)){
+  if (!packet->ParseFromCodedStream(&coded_input)) {
     return false;
   }
   // Once the embedded message has been parsed, PopLimit() is called to undo the
   // limit
   coded_input.PopLimit(msgLimit);
-  return true; 
+  return true;
 }
 
 /**
@@ -178,7 +177,6 @@ bool messages::ProtoBuf::receiveMessage(int socket, std::string *recvMsg) {
   std::ostringstream ss;
   ss << buffer;
   *recvMsg = ss.str();
-  std::cout << "Server msg: " << *recvMsg << std::endl;
   return true; 
 }
 
