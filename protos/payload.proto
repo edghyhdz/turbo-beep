@@ -28,12 +28,14 @@ message packet {
   }
 
   message Crypto {
-      optional bytes hashedKey = 1; 
-      optional bytes peerHashedKey = 2; 
-      optional bytes encryptedMsg = 3;
-      optional string nonce = 4;
-      optional bytes encryptedNonce = 5;
-      optional bytes encryptedFile = 6;   
+      optional bytes publicKey = 1; 
+      optional bytes hashedKey = 2; 
+      optional bytes peerHashedKey = 3; 
+      optional bytes encryptedHashedKey = 4; 
+      optional bytes encryptedMsg = 5;
+      optional string nonce = 6;
+      optional bytes encryptedNonce = 7;  
+      optional bytes encryptedFile = 8;  
   }
 
   message OtherPeerInfo {
@@ -43,4 +45,5 @@ message packet {
   }
 
   required Payload payload = 2; 
+
 }
