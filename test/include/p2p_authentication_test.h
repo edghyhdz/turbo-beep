@@ -1,7 +1,7 @@
 #ifndef P2P_AUTHENTICATION_TEST
 #define P2P_AUTHENTICATION_TEST
 #include "server_tests.h"
-#include "socket_creator.h"
+#include "peer.h"
 #include <gtest/gtest.h>
 
 using namespace turbobeep; 
@@ -15,10 +15,14 @@ public:
   static void SetUpTestCase(){};
   static void TearDownTestCase(){};
   int peerWrapper();
+  std::string const getPath(std::string &&pathName); 
+
+private:
+  std::string _certPath;
 
 protected:
-  std::shared_ptr<p2p::Socket> _peerOne; 
-  std::shared_ptr<p2p::Socket> _peerTwo; 
+  std::shared_ptr<p2p::Peer> _peerOne; 
+  std::shared_ptr<p2p::Peer> _peerTwo; 
   std::shared_ptr<mediator::Server> _server;
 
   char *_ipAddress;
