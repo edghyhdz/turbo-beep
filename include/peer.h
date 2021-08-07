@@ -56,7 +56,7 @@ public:
   std::string peerHashedKey() const { return _myInfo.peerHash; }
 
 private:
-  std::unique_ptr<messages::ProtoBuf> _protoHandle; 
+  std::unique_ptr<messages::ProtoBuf> _messageHandler; 
   addrinfo _hints, *_p;
   struct sockaddr_in _myAddr, _peerAddr;
   void _setIpAddress();

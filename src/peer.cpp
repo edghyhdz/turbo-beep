@@ -12,13 +12,14 @@ p2p::Peer::Peer(char *&ipAddress, char *&portNum, std::string flag, std::string 
          std::string pathPeerPublicKey)
     : _hasAdvertisedFirst(false), _needsAuth(true) {
 
-  _protoHandle = std::make_unique<messages::ProtoBuf>(pathKeyPair, pathPeerPublicKey);
+  _messageHandler = std::make_unique<messages::ProtoBuf>(pathKeyPair, pathPeerPublicKey);
   _myInfo.userName = ""; 
-  _myInfo.peerName = ""; 
-  _myInfo.myHash = _protoHandle->sha1(_protoHandle->publicKey(),
-                                        _protoHandle->publicKey().length());
-  _myInfo.peerHash = _protoHandle->sha1(_protoHandle->peerPublicKey(),
-                                        _protoHandle->peerPublicKey().length());
+  _myInfo.peerName = "";
+  _myInfo.myHash = _messageHandler->sha1(_messageHandler->publicKey(),
+                                         _messageHandler->publicKey().length());
+  _myInfo.peerHash =
+      _messageHandler->sha1(_messageHandler->peerPublicKey(),
+                            _messageHandler->peerPublicKey().length());
 
   // Get own ip address
   _setIpAddress();
@@ -35,7 +36,7 @@ p2p::Peer::Peer(char *&ipAddress, char *&portNum, std::string userName,
                std::string peerName)
     : _hasAdvertisedFirst(false), _needsAuth(false){
 
-  _protoHandle = std::make_unique<messages::ProtoBuf>(); 
+  _messageHandler = std::make_unique<messages::ProtoBuf>(); 
   _myInfo.userName = userName; 
   _myInfo.peerName = peerName; 
 
@@ -75,7 +76,7 @@ void p2p::Peer::_listenToServer() {
   if (!_needsAuth) {
     do {
       std::string recvMessage;
-      if (!_protoHandle->receiveMessage(_sockFD, &recvMessage)) {
+      if (!_messageHandler->receiveMessage(_sockFD, &recvMessage)) {
         throw std::runtime_error(
             "Error receiving message. Connection closed by server");
       } else {
@@ -96,14 +97,13 @@ void p2p::Peer::_listenToServer() {
 
   } else {
     // Authentication needed, challenge/response authentication steps
-
-    if (!_protoHandle->authenticate(_sockFD)){
+    if (!_messageHandler->authenticate(_sockFD)){
       throw std::runtime_error("Failed to authenticate"); 
     }
 
     // Wait for peer info to be sent
     payload::packet packet; 
-    _protoHandle->receiveMessage(_sockFD, &packet); 
+    _messageHandler->receiveMessage(_sockFD, &packet); 
     auto *payload = packet.mutable_payload(); 
     auto *otherPeerInfo = payload->mutable_otherpeerinfo(); 
     _peerIpAddress = otherPeerInfo->peeripaddress();
@@ -199,8 +199,8 @@ void p2p::Peer::connectToServer(payload::packet::MessageTypes &mType) {
   int size; 
 
   // Add information to the packet and send message
-  _protoHandle->addUserInfo(&size, &packet, myInfo(), mType);
-  _protoHandle->sendMessage(size, _sockFD, packet);
+  _messageHandler->addUserInfo(&size, &packet, myInfo(), mType);
+  _messageHandler->sendMessage(size, _sockFD, packet);
 
   // wait until other client has connected
   std::unique_lock<std::mutex> lck(_mutex);
@@ -256,11 +256,11 @@ bool p2p::Peer::connectToPeer() {
 
   // Peer authentication depending on what peer advertised first to the server
   if (_hasAdvertisedFirst) {
-    return _protoHandle->authenticate(_connFD);
+    return _messageHandler->authenticate(_connFD);
   }
   // If not, then verify authentication
-  std::string peerKey = _protoHandle->peerPublicKey();
-  return _protoHandle->verify(_connFD, peerKey);
+  std::string peerKey = _messageHandler->peerPublicKey();
+  return _messageHandler->verify(_connFD, peerKey);
 }
 
 /**
@@ -271,7 +271,7 @@ void p2p::Peer::listenToPeer(){
     std::cout << "> ";
     payload::packet packet;
 
-    if (!_protoHandle->receiveMessage(_connFD, &packet)){
+    if (!_messageHandler->receiveMessage(_connFD, &packet)){
       throw std::runtime_error("Could not receive message."); 
     }
 
@@ -280,8 +280,8 @@ void p2p::Peer::listenToPeer(){
     auto *crypto = payload->mutable_crypto();
 
     std::string encrypted_msg = crypto->encryptedmsg();
-    std::string decrypted_msg = _protoHandle->decryptWithPublicKey(
-        encrypted_msg, _protoHandle->peerPublicKey());
+    std::string decrypted_msg = _messageHandler->decryptWithPublicKey(
+        encrypted_msg, _messageHandler->peerPublicKey());
     std::cout << "[" << _peerIpAddress << "]: " << decrypted_msg << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
@@ -302,10 +302,10 @@ void p2p::Peer::peerMessageHandler() {
 
     packet.set_time_stamp(messages::ProtoBuf::getTimeStamp());
     payload->set_type(payload::packet_MessageTypes_SUCCESS);
-    crypto->set_encryptedmsg(_protoHandle->signString(userInput));
+    crypto->set_encryptedmsg(_messageHandler->signString(userInput));
     size = packet.ByteSize() + 4;
 
-    _protoHandle->sendMessage(size, _connFD, packet); 
+    _messageHandler->sendMessage(size, _connFD, packet); 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 }
