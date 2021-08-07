@@ -164,6 +164,113 @@ bool messages::ProtoBuf::receiveMessage(int sock, payload::packet *packet){
 }
 
 /**
+ * Authenticate against other peer or server
+ * @param sock users' socket to authenticate to
+ */ 
+bool messages::ProtoBuf::authenticate(int sock){
+  int size;
+  payload::packet packet;
+  if (!this->receiveMessage(sock, &packet)) {
+    std::cout << "[AUTHENTICATE] Could not authenticate. Connection closed by other party"
+              << std::endl;
+    return false;
+  }
+  auto *payload = packet.mutable_payload();
+  auto *crypto = payload->mutable_crypto();
+
+  // Message should contain a type CHALLENGE and the nonce to encrypt
+  std::string encryptedNonce = this->signString(crypto->nonce());
+
+  // Respond to challenge
+  packet.set_time_stamp(this->getTimeStamp());
+  payload->set_type(payload::packet_MessageTypes_RESPONSE);
+  crypto->set_encryptednonce(encryptedNonce);
+  size = packet.ByteSize() + 4;
+
+  // Send encrypted nonce for server to verify
+  this->sendMessage(size, sock, packet);
+
+  // Upon successfully authenticating, server will keep connection open
+  // Wait for server to send peer information
+  if (!this->receiveMessage(sock, &packet)) {
+    std::cout << "[AUTHENTICATE] Could not successfully authenticate." << std::endl;
+    return false; 
+  }
+
+  auto *success = packet.mutable_payload();
+
+  if (success->type() != payload::packet_MessageTypes_SUCCESS) {
+    return false;
+  }
+  std::cout << "[AUTHENTICATE] We have successfully authenticated with other party!" << std::endl;
+  return true; 
+}
+
+/**
+ * Verify upcoming response/challenge authentication. 
+ * 
+ * @param sock
+ * @param key other party public key
+ */
+bool messages::ProtoBuf::verify(int sock, std::string &key){
+  int size;
+  payload::packet challenge, response;
+
+  // Generate nonce to send for challenge request
+  auto nonce = this->generateNonce();
+
+  // Challenge packet
+  auto *pLoad = challenge.mutable_payload();
+  auto *crypto = pLoad->mutable_crypto();
+
+  // Set params to packet payload
+  challenge.set_time_stamp(messages::ProtoBuf::getTimeStamp());
+  pLoad->set_type(payload::packet_MessageTypes_CHALLENGE); 
+  crypto->set_nonce(nonce);
+  
+  // Get packet size
+  size = challenge.ByteSize() + 4;
+
+  // Send message and wait for challenge response
+  this->sendMessage(size, sock, challenge); 
+
+  // Get challenge response with encrypted nonce
+  if (!this->receiveMessage(sock, &response)){
+    std::cout << "[VERIFY] Could not verify authentication" << std::endl; 
+    return false; 
+  }
+
+  // Get encrypted nonce sent by peer and decrypt it to compare
+  pLoad = response.mutable_payload(); 
+  crypto = pLoad->mutable_crypto(); 
+  std::string encryptedNonce = crypto->encryptednonce();
+
+  std::string decryptedNonce = this->decryptWithPublicKey(encryptedNonce, key);
+  std::cout << "[VERIFY]: Decrypted nonce: " << decryptedNonce << std::endl; 
+
+  if (nonce != decryptedNonce){
+    std::cout << "[VERIFY] Could not authenticate... bye bye" << std::endl; 
+    return false; 
+  }
+
+  // Set params to packet payload
+  challenge.clear_time_stamp();
+  challenge.clear_payload(); 
+  challenge.set_time_stamp(messages::ProtoBuf::getTimeStamp());
+  pLoad = challenge.mutable_payload();
+  pLoad->set_type(payload::packet_MessageTypes_SUCCESS); 
+  
+  // Get packet size
+  size = challenge.ByteSize() + 4;
+
+  // Send success message
+  this->sendMessage(size, sock, challenge); 
+
+  std::cout << "[VERIFY]: Successfully authenticated" << std::endl; 
+  return true; 
+}
+
+/**
  * Receives a non serialized message
  */
 bool messages::ProtoBuf::receiveMessage(int socket, std::string *recvMsg) {

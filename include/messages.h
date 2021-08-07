@@ -2,7 +2,7 @@
 #define MESSAGES_H
 
 #include "payload.pb.h"
-#include "socket_creator.h"
+#include "peer.h"
 #include "crypto.h"
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/io/coded_stream.h>
@@ -38,6 +38,8 @@ public:
   void sendMessage(int size, int sock, payload::packet &packet);
   bool receiveMessage(int sock, payload::packet *packet); 
   bool receiveMessage(int sock, std::string *recvMsg);
+  bool authenticate(int sock); 
+  bool verify(int sock, std::string &key); 
 
   payload::packet setPeerData(int *size, std::string &peerIpAddress,
                               std::uint16_t &peerPort,
