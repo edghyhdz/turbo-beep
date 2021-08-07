@@ -20,6 +20,8 @@ p2p::Peer::Peer(char *&ipAddress, char *&portNum, std::string flag, std::string 
   _myInfo.peerHash =
       _messageHandler->sha1(_messageHandler->peerPublicKey(),
                             _messageHandler->peerPublicKey().length());
+  std::cout << "My hashed key: " << _myInfo.myHash << std::endl;
+  std::cout << "Peer hashed key: " << _myInfo.peerHash << std::endl;
 
   // Get own ip address
   _setIpAddress();
