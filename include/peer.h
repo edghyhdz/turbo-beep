@@ -1,9 +1,9 @@
 /**
- * Socket class declaration
+ * Peer class declaration
  */
 
-#ifndef SOCKET_CREATOR
-#define SOCKET_CREATOR
+#ifndef PEER_H
+#define PEER_H
 #include "payload.pb.h"
 #include <arpa/inet.h>
 #include <condition_variable>
@@ -34,16 +34,18 @@ struct myInfo {
   std::string peerHash; 
 }; 
 
-class Socket{
+class Peer{
 public:
-  Socket(char *&ipAddress, char *&portNum, std::string flag, std::string pathKeyPair,
+  Peer(char *&ipAddress, char *&portNum, std::string flag, std::string pathKeyPair,
          std::string pathPeerPublicKey);
 
-  Socket(char *&ipAddress, char *&portNum, std::string userName,
+  Peer(char *&ipAddress, char *&portNum, std::string userName,
          std::string peerName);
-  ~Socket();
+  ~Peer();
   void connectToServer(payload::packet::MessageTypes &mType);
-  void connectToPeer();
+  bool connectToPeer();
+  void listenToPeer(); 
+  void peerMessageHandler(); 
   void close();
   p2p::myInfo myInfo() const & { return _myInfo; }
   std::string ipAddress() const { return _myInfo.myIpAddress; }
@@ -69,7 +71,7 @@ private:
   int _connFD;
   int _addrInfo;
   bool _needsAuth; 
-  bool _connectionOpen;
+  bool _hasAdvertisedFirst;
   std::thread _t;
   std::string _peerName;
   std::uint16_t _peerPort;
