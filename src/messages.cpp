@@ -186,10 +186,12 @@ bool messages::ProtoBuf::receiveMessage(int socket, std::string *recvMsg) {
  * @param[in, out] size byte size of message
  * @param peerIpAddress other peer ip address
  * @param peerPort other peer port
+ * @param hasAdvertisedFirst who initiated the connection - useful for authentication
  */
 payload::packet messages::ProtoBuf::setPeerData(int *size,
-                                                 std::string &peerIpAddress,
-                                                 std::uint16_t &peerPort) {
+                                                std::string &peerIpAddress,
+                                                std::uint16_t &peerPort,
+                                                bool &hasAdvertisedFirst) {
   payload::packet packet;
   packet.set_time_stamp(this->getTimeStamp());
   auto *payload = packet.mutable_payload();
@@ -198,7 +200,7 @@ payload::packet messages::ProtoBuf::setPeerData(int *size,
   auto *otherPeerInfo = payload->mutable_otherpeerinfo();
   otherPeerInfo->set_peeripaddress(peerIpAddress);
   otherPeerInfo->set_peerport(peerPort);
-
+  otherPeerInfo->set_hasadvertisedfirst(hasAdvertisedFirst); 
   // Get packet size - including magic number
   *size = packet.ByteSize() + 4;
 

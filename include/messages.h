@@ -40,7 +40,8 @@ public:
   bool receiveMessage(int sock, std::string *recvMsg);
 
   payload::packet setPeerData(int *size, std::string &peerIpAddress,
-                               std::uint16_t &peerPort);
+                              std::uint16_t &peerPort,
+                              bool &hasAdvertisedFirst);
 
 private:
   std::string _publicKey;
