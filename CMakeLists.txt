@@ -26,8 +26,8 @@ file(COPY ${CMAKE_SOURCE_DIR}/certs DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # Client library
 add_library(client
-    ${PROJECT_SOURCE_DIR}/include/socket_creator.h
-    ${PROJECT_SOURCE_DIR}/src/socket_creator.cpp
+    ${PROJECT_SOURCE_DIR}/include/peer.h
+    ${PROJECT_SOURCE_DIR}/src/peer.cpp
     ${PROJECT_SOURCE_DIR}/src/socket/socket_utils.h
     ${PROJECT_SOURCE_DIR}/src/socket/socket_utils.h
     ${PROJECT_SOURCE_DIR}/src/socket/ip_call.h
