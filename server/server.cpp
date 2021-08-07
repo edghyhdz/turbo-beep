@@ -19,10 +19,10 @@
  * Server class member definitions
  */
 
-using namespace turbobeep; 
+using namespace turbobeep;
 
 mediator::Server::Server(std::uint16_t port) : _serverPort(port) {
-  _protoHandle = std::make_unique<messages::ProtoBuf>(); 
+  _msgHandler = std::make_unique<messages::ProtoBuf>(); 
   this->initServer(); 
 }
 
@@ -132,18 +132,18 @@ void mediator::Server::_readyToP2P(int const &socket, bool &isProto) {
         // Check if its a serialized protobuffer message
         if (isProto){
           int sizeP1, sizeP2;
-          payload::packet packetP1 = _protoHandle->setPeerData(
+          payload::packet packetP1 = _msgHandler->setPeerData(
               &sizeP1, _userDescriptor.at(peerName).peerInfo.ipAddress,
               _userDescriptor.at(peerName).peerInfo.port,
               _userDescriptor.at(peerName).isClient);
 
-          payload::packet packetP2 = _protoHandle->setPeerData(
+          payload::packet packetP2 = _msgHandler->setPeerData(
               &sizeP2, key_val.second.peerInfo.ipAddress,
               key_val.second.peerInfo.port, key_val.second.isClient);
 
           // Send both peers the other peer's information
-          _protoHandle->sendMessage(sizeP1, peerSocket, packetP1);
-          _protoHandle->sendMessage(sizeP2, socket, packetP2);
+          _msgHandler->sendMessage(sizeP1, peerSocket, packetP1);
+          _msgHandler->sendMessage(sizeP2, socket, packetP2);
 
         } else {
           // Non serialized data
@@ -224,13 +224,19 @@ void mediator::Server::runServer() {
         bool isProto = false; 
         payload::packet packet;
         // Check if there is a message
-        if (_protoHandle->receiveMessage(sock, &packet)) {
+        if (_msgHandler->receiveMessage(sock, &packet)) {
           auto *payload = packet.mutable_payload();
           bool checkForPeer = false;
           if (payload->type() == payload::packet::ADVERTISE) {
             // If authentication fails, close connection with client
             isProto = true;
-            checkForPeer = this->authenticate(sock, *payload);
+            auto *crypto = payload->mutable_crypto();
+            std::string hashedKey = crypto->hashedkey();
+
+            // Get public key. NOTE: Here I use a really simple way to store
+            // public keys just for testing purposes
+            std::string key = this->getPublicKey(hashedKey); 
+            checkForPeer = _msgHandler->verify(sock, key);
           } else if (payload->type() == payload::packet::PEER_INFO) {
             // PEER_INFO requires no authentication
             checkForPeer = true;
@@ -253,66 +259,16 @@ void mediator::Server::runServer() {
     }
   }
 }
+std::string mediator::Server::getPublicKey(std::string &hashedKey){
+  // NOTE
+  // ------------------------------------------------------------------
+  // This is just for testing. You may want to add another way to
+  // fetch peer's public keys rather than by calling a folder with the
+  // public keys
+  std::string pathCert = CERTIFICATES_PATH;
+  std::string keyPath = pathCert + hashedKey + "/public.pem";
 
-/**
- * Authenticate connecting socket
- * 
- * @param sock user socket that will be authenticated
- * @param payload payload containing peer user info (prob not needed here)
- */ 
-bool mediator::Server::authenticate(int sock, payload::packet_Payload &payload){
-  int size;
-  payload::packet challenge, response;
-
-  auto *cryptoUser = payload.mutable_crypto();
-  std::string hashedKey = cryptoUser->hashedkey();
-
-  // Generate nonce to send for challenge request
-  auto nonce = _protoHandle->generateNonce();
-
-  // Challenge packet
-  auto *pLoad = challenge.mutable_payload();
-  auto *crypto = pLoad->mutable_crypto();
-
-  // Set params to packet payload
-  challenge.set_time_stamp(messages::ProtoBuf::getTimeStamp());
-  pLoad->set_type(payload::packet_MessageTypes_CHALLENGE); 
-  crypto->set_nonce(nonce);
-  
-  // Get packet size
-  size = challenge.ByteSize() + 4;
-
-  // Send message and wait for challenge response
-  _protoHandle->sendMessage(size, sock, challenge); 
-
-  // Get challenge response with encrypted nonce
-  if (!_protoHandle->receiveMessage(sock, &response)){
-    std::cout << "Could not authenticate" << std::endl; 
-    return false; 
-  }
-
-  // Get encrypted nonce sent by peer and decrypt it to compare
-  pLoad = response.mutable_payload(); 
-  crypto = pLoad->mutable_crypto(); 
-  std::string encryptedNonce = crypto->encryptednonce();
-
-  // NOTE ------------------------------------------------------------------
-  // This is just for testing. You may want to add another way to fetch
-  // peer's public keys rather than by calling a folder with the public keys
-  std::string pathCert = CERTIFICATES_PATH; 
-  std::string keyPath = pathCert + hashedKey + "/public.pem"; 
-  std::string key = _protoHandle->loadPublicKey(keyPath);
-
-  std::string decryptedNonce = _protoHandle->decryptWithPublicKey(encryptedNonce, key);
-  std::cout << "[SERVER]: Decrypted nonce: " << decryptedNonce << std::endl; 
-
-  if (nonce != decryptedNonce){
-    std::cout << "Could not authenticate... bye bye" << std::endl; 
-    return false; 
-  }
-
-  std::cout << "[SERVER]: Successfully authenticated" << std::endl; 
-  return true; 
+  return _msgHandler->loadPublicKey(keyPath); 
 }
 
 bool mediator::Server::_isAuthenticating(int sock){

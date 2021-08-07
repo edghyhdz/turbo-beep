@@ -45,7 +45,7 @@ public:
   ~Server();
   void initServer();
   void runServer();
-  bool authenticate(int sock, payload::packet_Payload &payload);
+  std::string getPublicKey(std::string &hashedKey); 
 
 private:
   void _updatePeerInfo(std::string const &user, std::string const &peer);
@@ -60,7 +60,7 @@ private:
   fd_set _master;
   std::map<std::string, userInfo> _userDescriptor;
   std::uint16_t _serverPort;
-  std::unique_ptr<messages::ProtoBuf> _protoHandle; 
+  std::unique_ptr<messages::ProtoBuf> _msgHandler; 
   std::vector<int> _authenticating;  // Users currently authenticating
   std::vector<int> _needAuthentication;  // Users currently authenticating
   std::mutex _mutex;
