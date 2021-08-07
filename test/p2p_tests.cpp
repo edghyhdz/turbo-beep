@@ -20,8 +20,8 @@ void P2PFixture::SetUp() {
   strcpy(_port, portStr.c_str());
   std::string userName{"peerOne"};
   std::string theirUserName{"peerTwo"};
-  _peerOne = std::make_shared<p2p::Socket>(_ipAddress, _port, userName, theirUserName); 
-  _peerTwo = std::make_shared<p2p::Socket>(_ipAddress, _port, theirUserName, userName); 
+  _peerOne = std::make_shared<p2p::Peer>(_ipAddress, _port, userName, theirUserName); 
+  _peerTwo = std::make_shared<p2p::Peer>(_ipAddress, _port, theirUserName, userName); 
 }
 
 void P2PFixture::TearDown() {
@@ -61,7 +61,7 @@ TEST_F(P2PFixture, SuccessfulDiscconectFromServerAferBothPeersOnline) {
   auto mTypePI = payload::packet_MessageTypes_PEER_INFO;
 
   _tServer = std::thread(&mediator::Server::runServer, _server);
-  _tPeer = std::thread(&p2p::Socket::connectToServer, _peerOne,  std::ref(mTypePI));
+  _tPeer = std::thread(&p2p::Peer::connectToServer, _peerOne,  std::ref(mTypePI));
 
   // Wait for wrapper to return
   int retval = this->peerWrapper();
