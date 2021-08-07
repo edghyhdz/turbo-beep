@@ -13,7 +13,7 @@ P2PMessage::P2PMessage() {
   strcpy(_port, portStr.c_str());
   std::string userName{"peerOne"};
   std::string theirUserName{"peerTwo"};
-  _socket = std::make_shared<p2p::Socket>(_ipAddress, _port, userName,
+  _peer = std::make_shared<p2p::Peer>(_ipAddress, _port, userName,
                                           theirUserName);
   _messageHandler = std::make_shared<messages::ProtoBuf>();                                           
 }
@@ -22,7 +22,7 @@ P2PMessage::~P2PMessage() {}
 
 void P2PMessage::SetUp() {
   auto mTypePI = payload::packet_MessageTypes_PEER_INFO;
-  _messageHandler->addUserInfo(&_size, &_packet, _socket->myInfo(), mTypePI);
+  _messageHandler->addUserInfo(&_size, &_packet, _peer->myInfo(), mTypePI);
 }
 
 void P2PMessage::TearDown() {
@@ -34,9 +34,9 @@ TEST_F(P2PMessage, AddPeerDataToProtobuffer) {
   auto *crypto = _packet.mutable_payload();
   auto *peerInfo = crypto->mutable_peerinfo();
 
-  ASSERT_EQ(peerInfo->ipaddress(), _socket->ipAddress());
-  ASSERT_EQ(peerInfo->port(), _socket->port());
-  ASSERT_EQ(peerInfo->username(), _socket->userName());
+  ASSERT_EQ(peerInfo->ipaddress(), _peer->ipAddress());
+  ASSERT_EQ(peerInfo->port(), _peer->port());
+  ASSERT_EQ(peerInfo->username(), _peer->userName());
 }
 
 TEST_F(P2PMessage, BufferByteSizeTest) {
@@ -48,10 +48,10 @@ TEST_F(P2PMessage, BufferByteSizeTest) {
   auto *peerInfo = payload->mutable_peerinfo();
 
   payload->set_type(tempPacket.ADVERTISE);
-  peerInfo->set_port(_socket->port());
-  peerInfo->set_ipaddress(_socket->ipAddress());
-  peerInfo->set_username(_socket->userName());
-  peerInfo->set_peername(_socket->peerName());
+  peerInfo->set_port(_peer->port());
+  peerInfo->set_ipaddress(_peer->ipAddress());
+  peerInfo->set_username(_peer->userName());
+  peerInfo->set_peername(_peer->peerName());
   const auto timeStamp = std::chrono::system_clock::now();
   long tS = std::chrono::duration_cast<std::chrono::milliseconds>(
                 timeStamp.time_since_epoch())
@@ -59,8 +59,8 @@ TEST_F(P2PMessage, BufferByteSizeTest) {
 
   tempPacket.set_time_stamp(tS);
 
-  crypto->set_hashedkey(_socket->hashedKey());
-  crypto->set_peerhashedkey(_socket->peerHashedKey()); 
+  crypto->set_hashedkey(_peer->hashedKey());
+  crypto->set_peerhashedkey(_peer->peerHashedKey()); 
 
   // 4-byte "magic number" that helps use identify size of the packet
   ASSERT_EQ(_size, tempPacket.ByteSize() + 4);

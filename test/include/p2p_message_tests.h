@@ -1,7 +1,7 @@
 #ifndef P2P_MESSAGE_TEST
 #define P2P_MESSAGE_TEST
 #include "server_tests.h"
-#include "socket_creator.h"
+#include "peer.h"
 #include "messages.h"
 #include <gtest/gtest.h>
 #include <memory>
@@ -18,9 +18,8 @@ public:
   static void TearDownTestCase(){};
 
 protected:
-  std::shared_ptr<p2p::Socket> _socket; 
+  std::shared_ptr<p2p::Peer> _peer; 
   std::shared_ptr<messages::ProtoBuf> _messageHandler; 
-  // p2p::Socket *_socket;
   int _size; 
   payload::packet _packet;
   char *_ipAddress;
