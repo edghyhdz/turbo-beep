@@ -22,7 +22,7 @@ P2PMessage::~P2PMessage() {}
 
 void P2PMessage::SetUp() {
   auto mTypePI = payload::packet_MessageTypes_PEER_INFO;
-  messages::ProtoBuf::addUserInfo(&_size, &_packet, _socket->myInfo(), mTypePI);
+  _messageHandler->addUserInfo(&_size, &_packet, _socket->myInfo(), mTypePI);
 }
 
 void P2PMessage::TearDown() {
@@ -73,14 +73,14 @@ TEST_F(P2PMessage, ProtobufferSerializationTestNoThrow) {
       new google::protobuf::io::CodedOutputStream(&aos);
 
   // Should serialize the message correctly
-  ASSERT_NO_THROW((void)_messageHandler->serializeMessage(coded_output, _packet));
+  ASSERT_NO_THROW(
+      (void)_messageHandler->serializeMessage(coded_output, _packet));
 
-  // Remove overhead from protobuffer and add the 4-byte "magic number" that helps
-  // use identify size of the packet
+  // Remove overhead from protobuffer and add the 4-byte "magic number" that
+  // helps use identify size of the packet
   ASSERT_EQ(coded_output->ByteCount(), _size - 4 + 1);
 
-  std::cout << "Send message and free up them memory" << std::endl;
   delete[] pkt;
   delete coded_output;
-  google::protobuf::ShutdownProtobufLibrary();
+  // google::protobuf::ShutdownProtobufLibrary();
 }
