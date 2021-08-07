@@ -134,11 +134,12 @@ void mediator::Server::_readyToP2P(int const &socket, bool &isProto) {
           int sizeP1, sizeP2;
           payload::packet packetP1 = _protoHandle->setPeerData(
               &sizeP1, _userDescriptor.at(peerName).peerInfo.ipAddress,
-              _userDescriptor.at(peerName).peerInfo.port);
+              _userDescriptor.at(peerName).peerInfo.port,
+              _userDescriptor.at(peerName).isClient);
 
           payload::packet packetP2 = _protoHandle->setPeerData(
               &sizeP2, key_val.second.peerInfo.ipAddress,
-              key_val.second.peerInfo.port);
+              key_val.second.peerInfo.port, key_val.second.isClient);
 
           // Send both peers the other peer's information
           _protoHandle->sendMessage(sizeP1, peerSocket, packetP1);
@@ -300,7 +301,6 @@ bool mediator::Server::authenticate(int sock, payload::packet_Payload &payload){
   // peer's public keys rather than by calling a folder with the public keys
   std::string pathCert = CERTIFICATES_PATH; 
   std::string keyPath = pathCert + hashedKey + "/public.pem"; 
-  std::cout << "Path: " << keyPath << std::endl; 
   std::string key = _protoHandle->loadPublicKey(keyPath);
 
   std::string decryptedNonce = _protoHandle->decryptWithPublicKey(encryptedNonce, key);
