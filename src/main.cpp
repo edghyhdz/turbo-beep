@@ -27,7 +27,9 @@ int main(int argc, char **argv) {
     // Wait for method to return - waiting for other peer
     peer.connectToServer(mTypeAdv);
     // After other peer has connected -> start trying to connect to peer
-    peer.connectToPeer();
+    if (!peer.connectToPeer())
+      throw std::runtime_error("Could not connect"); 
+
     std::thread tListen(&p2p::Peer::listenToPeer, &peer);
     std::thread tMsgHandler(&p2p::Peer::peerMessageHandler, &peer);
 
