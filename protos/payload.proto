@@ -39,7 +39,8 @@ message packet {
 
   message OtherPeerInfo {
       required uint32 peerPort = 1; 
-      required string peerIpAddress = 2; 
+      required string peerIpAddress = 2;
+      required bool hasAdvertisedFirst = 3;  
   }
 
   required Payload payload = 2; 
