@@ -18,10 +18,10 @@ typedef google::protobuf::io::ArrayInputStream array_input_stream;
 namespace turbobeep {
 namespace messages {
 
-class ProtoBuf : public crypto::RSA {
+class MessageHandler : public crypto::RSA {
 public:
-  ProtoBuf(){};
-  ProtoBuf(std::string keyPair, std::string peerPublicKey)
+  MessageHandler(){};
+  MessageHandler(std::string keyPair, std::string peerPublicKey)
       : RSA(keyPair, peerPublicKey){};
     
   static long getTimeStamp(); 

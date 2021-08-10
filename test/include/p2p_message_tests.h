@@ -19,7 +19,7 @@ public:
 
 protected:
   std::shared_ptr<p2p::Peer> _peer; 
-  std::shared_ptr<messages::ProtoBuf> _messageHandler; 
+  std::shared_ptr<messages::MessageHandler> _messageHandler; 
   int _size; 
   payload::packet _packet;
   char *_ipAddress;

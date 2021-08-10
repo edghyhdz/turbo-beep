@@ -15,7 +15,7 @@ P2PMessage::P2PMessage() {
   std::string theirUserName{"peerTwo"};
   _peer = std::make_shared<p2p::Peer>(_ipAddress, _port, userName,
                                           theirUserName);
-  _messageHandler = std::make_shared<messages::ProtoBuf>();                                           
+  _messageHandler = std::make_shared<messages::MessageHandler>();                                           
 }
 
 P2PMessage::~P2PMessage() {}

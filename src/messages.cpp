@@ -7,7 +7,7 @@ using namespace turbobeep;
 
 
 // Generates current timestamp
-long messages::ProtoBuf::getTimeStamp(){
+long messages::MessageHandler::getTimeStamp(){
   const auto timeStamp = std::chrono::system_clock::now();
   return std::chrono::duration_cast<std::chrono::milliseconds>(
                 timeStamp.time_since_epoch())
@@ -22,7 +22,7 @@ long messages::ProtoBuf::getTimeStamp(){
  * @param[in] packet packet object needed to serialize coded_output
  * @param[in] myInfo struct containing user information (port, ip, name)
  */
-void messages::ProtoBuf::addUserInfo(int *size, payload::packet *packet,
+void messages::MessageHandler::addUserInfo(int *size, payload::packet *packet,
                                      p2p::myInfo const &myInfo,
                                      payload::packet::MessageTypes &mType) {
 
@@ -56,7 +56,7 @@ void messages::ProtoBuf::addUserInfo(int *size, payload::packet *packet,
  * @param[in, out] coded_output serialized object to send to peer
  * @param[in] packet packet object needed to serialize coded_output
  */
-void messages::ProtoBuf::serializeMessage(output_stream *coded_output,
+void messages::MessageHandler::serializeMessage(output_stream *coded_output,
                                           payload::packet &packet) {
 
   coded_output->WriteVarint32(packet.ByteSize());
@@ -70,7 +70,7 @@ void messages::ProtoBuf::serializeMessage(output_stream *coded_output,
  * ProtoBuf::deserializeMessage
  * @returns the size of the message
  */
-uint32g messages::ProtoBuf::readHeader(char *buffer) {
+uint32g messages::MessageHandler::readHeader(char *buffer) {
   uint32g size;
   array_input_stream ais(buffer, 4);
   input_stream coded_input(&ais);
@@ -85,7 +85,7 @@ uint32g messages::ProtoBuf::readHeader(char *buffer) {
  * @param buffer buffer containing data
  * @param size message size
  */
-bool messages::ProtoBuf::deserializeMessage(payload::packet *packet, char *buffer, uint32g size){
+bool messages::MessageHandler::deserializeMessage(payload::packet *packet, char *buffer, uint32g size){
   // Assign ArrayInputStream with enough memory
   array_input_stream ais(buffer, size + 4);
   input_stream coded_input(&ais);
@@ -114,7 +114,7 @@ bool messages::ProtoBuf::deserializeMessage(payload::packet *packet, char *buffe
  * @param size size of the message as given by messages::Receive::readHeader()
  * @param[in, out] packet protobuf packet, containing payload to be deserialized
  */
-bool messages::ProtoBuf::readBody(int sock, uint32g size, payload::packet *packet){
+bool messages::MessageHandler::readBody(int sock, uint32g size, payload::packet *packet){
   int bytecount;
   char buffer[size + 4];
   bytecount = recv(sock, (void *)buffer, 4 + size, 0);
@@ -129,7 +129,7 @@ bool messages::ProtoBuf::readBody(int sock, uint32g size, payload::packet *packe
  * @param sock user socket to send message to
  * @param packet protobuf payload packet
  */
-void messages::ProtoBuf::sendMessage(int size, int sock, payload::packet &packet){
+void messages::MessageHandler::sendMessage(int size, int sock, payload::packet &packet){
 
   char *pkt = new char[size];
   array_output_stream aos(pkt, size);
@@ -151,7 +151,7 @@ void messages::ProtoBuf::sendMessage(int size, int sock, payload::packet &packet
  * @param sock user socket from which we receive message
  * @param[in, out] packet protobuf payload packet to write incoming message to
  */
-bool messages::ProtoBuf::receiveMessage(int sock, payload::packet *packet){
+bool messages::MessageHandler::receiveMessage(int sock, payload::packet *packet){
   char buffer[4];
   int bytesIn; 
   memset(buffer, '\0', 4);
@@ -167,7 +167,7 @@ bool messages::ProtoBuf::receiveMessage(int sock, payload::packet *packet){
  * Authenticate against other peer or server
  * @param sock users' socket to authenticate to
  */ 
-bool messages::ProtoBuf::authenticate(int sock){
+bool messages::MessageHandler::authenticate(int sock){
   int size;
   payload::packet packet;
   if (!this->receiveMessage(sock, &packet)) {
@@ -212,7 +212,7 @@ bool messages::ProtoBuf::authenticate(int sock){
  * @param sock
  * @param key other party public key
  */
-bool messages::ProtoBuf::verify(int sock, std::string &key){
+bool messages::MessageHandler::verify(int sock, std::string &key){
   int size;
   payload::packet challenge, response;
 
@@ -224,7 +224,7 @@ bool messages::ProtoBuf::verify(int sock, std::string &key){
   auto *crypto = pLoad->mutable_crypto();
 
   // Set params to packet payload
-  challenge.set_time_stamp(messages::ProtoBuf::getTimeStamp());
+  challenge.set_time_stamp(messages::MessageHandler::getTimeStamp());
   pLoad->set_type(payload::packet_MessageTypes_CHALLENGE); 
   crypto->set_nonce(nonce);
   
@@ -256,7 +256,7 @@ bool messages::ProtoBuf::verify(int sock, std::string &key){
   // Set params to packet payload
   challenge.clear_time_stamp();
   challenge.clear_payload(); 
-  challenge.set_time_stamp(messages::ProtoBuf::getTimeStamp());
+  challenge.set_time_stamp(messages::MessageHandler::getTimeStamp());
   pLoad = challenge.mutable_payload();
   pLoad->set_type(payload::packet_MessageTypes_SUCCESS); 
   
@@ -273,7 +273,7 @@ bool messages::ProtoBuf::verify(int sock, std::string &key){
 /**
  * Receives a non serialized message
  */
-bool messages::ProtoBuf::receiveMessage(int socket, std::string *recvMsg) {
+bool messages::MessageHandler::receiveMessage(int socket, std::string *recvMsg) {
   char buffer[128];
   memset(buffer, 0, 128);
   int bytesReceived = recv(socket, buffer, 128, 0);
@@ -295,7 +295,7 @@ bool messages::ProtoBuf::receiveMessage(int socket, std::string *recvMsg) {
  * @param peerPort other peer port
  * @param hasAdvertisedFirst who initiated the connection - useful for authentication
  */
-payload::packet messages::ProtoBuf::setPeerData(int *size,
+payload::packet messages::MessageHandler::setPeerData(int *size,
                                                 std::string &peerIpAddress,
                                                 std::uint16_t &peerPort,
                                                 bool &hasAdvertisedFirst) {

@@ -22,7 +22,7 @@
 using namespace turbobeep;
 
 mediator::Server::Server(std::uint16_t port) : _serverPort(port) {
-  _msgHandler = std::make_unique<messages::ProtoBuf>(); 
+  _msgHandler = std::make_unique<messages::MessageHandler>(); 
   this->initServer(); 
 }
 

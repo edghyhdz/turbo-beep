@@ -29,7 +29,7 @@ public:
 
 protected:
   mediator::TestServer server;
-  std::shared_ptr<messages::ProtoBuf> _messageHandler; 
+  std::shared_ptr<messages::MessageHandler> _messageHandler; 
 };
 
 #endif

@@ -60,7 +60,7 @@ private:
   fd_set _master;
   std::map<std::string, userInfo> _userDescriptor;
   std::uint16_t _serverPort;
-  std::unique_ptr<messages::ProtoBuf> _msgHandler; 
+  std::unique_ptr<messages::MessageHandler> _msgHandler; 
   std::vector<int> _authenticating;  // Users currently authenticating
   std::vector<int> _needAuthentication;  // Users currently authenticating
   std::mutex _mutex;

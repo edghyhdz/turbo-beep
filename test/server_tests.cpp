@@ -18,7 +18,7 @@ void ServerFixture::SetUp() {
   payload::packet packetFirstPeer, packetSecondPeer; 
   std::string buffer;
   p2p::myInfo firstPeer, secondPeer; 
-  _messageHandler = std::make_shared<messages::ProtoBuf>();                                           
+  _messageHandler = std::make_shared<messages::MessageHandler>();                                           
 
   // Add both peer information to struct
   setMyInfo(&firstPeer, "127.0.0.1", 1234, "FirstPeer", "SecondPeer");
