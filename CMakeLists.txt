@@ -9,6 +9,8 @@ find_package(Protobuf REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 add_executable(p2p
+    ${PROJECT_SOURCE_DIR}/include/vendor/base64.h
+    ${PROJECT_SOURCE_DIR}/include/vendor/base64.cpp
     ${PROJECT_SOURCE_DIR}/include/messages.h
     ${PROJECT_SOURCE_DIR}/src/messages.cpp
     ${PROJECT_SOURCE_DIR}/src/main.cpp
