@@ -110,8 +110,13 @@ void p2p::Peer::_listenToServer() {
       // Wait for peer info to be sent
       payload::packet packet;
       if (!_messageHandler->receiveMessage(_sockFD, &packet)) {
-        std::cout << "Try again... " << std::endl; 
-        continue; 
+        payload::packet packet;
+        int size;
+        auto mtype = payload::packet_MessageTypes_ADVERTISE;
+        _messageHandler->addUserInfo(&size, &packet, myInfo(), mtype);
+        _messageHandler->sendMessage(size, _sockFD, packet);
+        std::cout << "Try again... " << std::endl;
+        continue;
         // throw std::runtime_error("Error receiving peer information");
       }
 
