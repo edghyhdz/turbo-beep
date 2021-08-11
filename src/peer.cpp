@@ -101,23 +101,25 @@ void p2p::Peer::_listenToServer() {
     } while (true);
 
   } else {
+    int retries{0}, size;
     do {
       // Authentication needed, challenge/response authentication steps
       if (!_messageHandler->authenticate(_sockFD)) {
         throw std::runtime_error("Failed to authenticate");
       }
-
-      // Wait for peer info to be sent
+      // Wait for peer info to be sent - It can fail the first times, if so then
+      // try it again bud!
       payload::packet packet;
       if (!_messageHandler->receiveMessage(_sockFD, &packet)) {
-        payload::packet packet;
-        int size;
         auto mtype = payload::packet_MessageTypes_ADVERTISE;
         _messageHandler->addUserInfo(&size, &packet, myInfo(), mtype);
         _messageHandler->sendMessage(size, _sockFD, packet);
         std::cout << "Try again... " << std::endl;
+        if (++retries > 10) {
+          throw std::runtime_error(
+              "Error receiving peer information. Too many retries");
+        }
         continue;
-        // throw std::runtime_error("Error receiving peer information");
       }
 
       auto *payload = packet.mutable_payload();
