@@ -259,6 +259,13 @@ void mediator::Server::runServer() {
     }
   }
 }
+
+/**
+ * Get public key of peer from /certs/ directory. It will try to find the
+ * directory named the same as the hashed key from the peer's public key
+ * 
+ * @param hashedKey public peer hashed key
+ */
 std::string mediator::Server::getPublicKey(std::string &hashedKey){
   // NOTE
   // ------------------------------------------------------------------
@@ -269,10 +276,4 @@ std::string mediator::Server::getPublicKey(std::string &hashedKey){
   std::string keyPath = pathCert + hashedKey + "/public.pem";
 
   return _msgHandler->loadPublicKey(keyPath); 
-}
-
-bool mediator::Server::_isAuthenticating(int sock){
-  std::lock_guard<std::mutex> lck(_mutex);
-  return std::find(_authenticating.begin(), _authenticating.end(), sock) !=
-         _authenticating.end();
 }
