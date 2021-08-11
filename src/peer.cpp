@@ -1,5 +1,4 @@
 #include "peer.h"
-// #include "file_handler.h"
 #include "messages.h"
 #include "vendor/base64.h"
 #include <iostream>
