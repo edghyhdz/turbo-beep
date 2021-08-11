@@ -21,8 +21,10 @@ typedef google::protobuf::io::ArrayOutputStream array_output_stream;
 
 namespace turbobeep {
 namespace messages {
-class ProtoBuf; // Forward declaration
+class MessageHandler; // Forward declaration
+// class FileHandler; // Forward declaration
 }
+
 namespace p2p {
 
 struct myInfo {
@@ -46,6 +48,9 @@ public:
   bool connectToPeer();
   void listenToPeer(); 
   void peerMessageHandler(); 
+  bool sendFile(std::string &filePath); 
+  bool receiveFile(); 
+
   void close();
   p2p::myInfo myInfo() const & { return _myInfo; }
   std::string ipAddress() const { return _myInfo.myIpAddress; }
@@ -56,7 +61,7 @@ public:
   std::string peerHashedKey() const { return _myInfo.peerHash; }
 
 private:
-  std::unique_ptr<messages::ProtoBuf> _messageHandler; 
+  std::unique_ptr<messages::MessageHandler> _messageHandler; 
   addrinfo _hints, *_p;
   struct sockaddr_in _myAddr, _peerAddr;
   void _setIpAddress();

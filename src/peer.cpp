@@ -1,6 +1,9 @@
 #include "peer.h"
+// #include "file_handler.h"
 #include "messages.h"
+#include "vendor/base64.h"
 #include <iostream>
+#include <math.h>
 #include <socket/socket_utils.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -12,7 +15,7 @@ p2p::Peer::Peer(char *&ipAddress, char *&portNum, std::string flag, std::string 
          std::string pathPeerPublicKey)
     : _hasAdvertisedFirst(false), _needsAuth(true) {
 
-  _messageHandler = std::make_unique<messages::ProtoBuf>(pathKeyPair, pathPeerPublicKey);
+  _messageHandler = std::make_unique<messages::MessageHandler>(pathKeyPair, pathPeerPublicKey);
   _myInfo.userName = ""; 
   _myInfo.peerName = "";
   _myInfo.myHash = _messageHandler->sha1(_messageHandler->publicKey(),
@@ -38,7 +41,7 @@ p2p::Peer::Peer(char *&ipAddress, char *&portNum, std::string userName,
                std::string peerName)
     : _hasAdvertisedFirst(false), _needsAuth(false){
 
-  _messageHandler = std::make_unique<messages::ProtoBuf>(); 
+  _messageHandler = std::make_unique<messages::MessageHandler>(); 
   _myInfo.userName = userName; 
   _myInfo.peerName = peerName; 
 
@@ -282,8 +285,13 @@ void p2p::Peer::listenToPeer(){
     auto *crypto = payload->mutable_crypto();
 
     std::string encrypted_msg = crypto->encryptedmsg();
-    std::string decrypted_msg = _messageHandler->decryptWithPublicKey(
-        encrypted_msg, _messageHandler->peerPublicKey());
+
+    // Since there are two ways to use this client. We need to seee if user
+    // needs auth to check if we encrypt/decrypt messages or not
+    std::string decrypted_msg =
+        _needsAuth ? _messageHandler->decryptWithPublicKey(
+                         encrypted_msg, _messageHandler->peerPublicKey())
+                   : encrypted_msg;
     std::cout << "[" << _peerIpAddress << "]: " << decrypted_msg << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
@@ -301,13 +309,31 @@ void p2p::Peer::peerMessageHandler() {
 
   while (true) {
     std::getline(std::cin, userInput);
-
-    packet.set_time_stamp(messages::ProtoBuf::getTimeStamp());
+    packet.set_time_stamp(messages::MessageHandler::getTimeStamp());
     payload->set_type(payload::packet_MessageTypes_SUCCESS);
-    crypto->set_encryptedmsg(_messageHandler->signString(userInput));
+
+    // Since there are two ways to use this client. We need to seee if user
+    // needs auth to check if we encrypt/decrypt messages or not
+    userInput = _needsAuth ? _messageHandler->signString(userInput) : userInput;
+    crypto->set_encryptedmsg(userInput);
     size = packet.ByteSize() + 4;
 
     _messageHandler->sendMessage(size, _connFD, packet); 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
+}
+
+/**
+ * Sends encrypted file to other peer
+ * @param filePath well, it is the file path of the file to send indeed
+ */
+bool p2p::Peer::sendFile(std::string &filePath){
+  return _messageHandler->sendFile(_connFD, filePath); 
+}
+
+/**
+ * Receive file
+ */
+bool p2p::Peer::receiveFile(){
+  return _messageHandler->receiveFile(_connFD);
 }
