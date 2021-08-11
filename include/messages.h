@@ -48,9 +48,6 @@ public:
 
 private:
   std::unique_ptr<messages::FileHandler> _fileHandler;
-  std::string _publicKey;
-  std::string _privateKey;
-  std::string _peerPublicKey;
 };
 
 } // namespace messages
