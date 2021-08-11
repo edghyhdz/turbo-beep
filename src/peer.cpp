@@ -101,25 +101,29 @@ void p2p::Peer::_listenToServer() {
     } while (true);
 
   } else {
-    // Authentication needed, challenge/response authentication steps
-    if (!_messageHandler->authenticate(_sockFD)){
-      throw std::runtime_error("Failed to authenticate"); 
-    }
+    do {
+      // Authentication needed, challenge/response authentication steps
+      if (!_messageHandler->authenticate(_sockFD)) {
+        throw std::runtime_error("Failed to authenticate");
+      }
 
-    // Wait for peer info to be sent
-    payload::packet packet; 
-    if (!_messageHandler->receiveMessage(_sockFD, &packet)){
-      throw std::runtime_error("Error receiving peer information"); 
-    } 
-    
-    auto *payload = packet.mutable_payload(); 
-    auto *otherPeerInfo = payload->mutable_otherpeerinfo(); 
-    _peerIpAddress = otherPeerInfo->peeripaddress();
-    _peerPort = otherPeerInfo->peerport();
+      // Wait for peer info to be sent
+      payload::packet packet;
+      if (!_messageHandler->receiveMessage(_sockFD, &packet)) {
+        std::cout << "Try again... " << std::endl; 
+        continue; 
+        // throw std::runtime_error("Error receiving peer information");
+      }
 
-    _hasAdvertisedFirst = otherPeerInfo->hasadvertisedfirst(); 
+      auto *payload = packet.mutable_payload();
+      auto *otherPeerInfo = payload->mutable_otherpeerinfo();
+      _peerIpAddress = otherPeerInfo->peeripaddress();
+      _peerPort = otherPeerInfo->peerport();
+
+      _hasAdvertisedFirst = otherPeerInfo->hasadvertisedfirst();
+      break; 
+    } while (true);
   }
-
   // Notify so that connectToServer() can return
   std::lock_guard<std::mutex> lck(_mutex);
   this->_cond.notify_one();
