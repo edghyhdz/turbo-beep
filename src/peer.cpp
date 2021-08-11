@@ -108,7 +108,10 @@ void p2p::Peer::_listenToServer() {
 
     // Wait for peer info to be sent
     payload::packet packet; 
-    _messageHandler->receiveMessage(_sockFD, &packet); 
+    if (!_messageHandler->receiveMessage(_sockFD, &packet)){
+      throw std::runtime_error("Error receiving peer information"); 
+    } 
+    
     auto *payload = packet.mutable_payload(); 
     auto *otherPeerInfo = payload->mutable_otherpeerinfo(); 
     _peerIpAddress = otherPeerInfo->peeripaddress();
