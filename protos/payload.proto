@@ -18,6 +18,7 @@ message packet {
       optional PeerInfo peerInfo = 2;
       optional Crypto crypto = 3; 
       optional OtherPeerInfo otherPeerInfo = 4;
+      optional FilePayload filePayload = 5; 
   }
 
   message PeerInfo {
@@ -35,13 +36,17 @@ message packet {
       optional bytes encryptedMsg = 5;
       optional string nonce = 6;
       optional bytes encryptedNonce = 7;  
-      optional bytes encryptedFile = 8;  
   }
 
   message OtherPeerInfo {
       required uint32 peerPort = 1; 
       required string peerIpAddress = 2;
       required bool hasAdvertisedFirst = 3;  
+  }
+
+  message FilePayload {
+      required bytes key = 1;
+      required string fileNameWithExt = 2; 
   }
 
   required Payload payload = 2; 
