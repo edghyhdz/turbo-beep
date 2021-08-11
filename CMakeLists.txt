@@ -9,10 +9,6 @@ find_package(Protobuf REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 add_executable(p2p
-    ${PROJECT_SOURCE_DIR}/include/vendor/base64.h
-    ${PROJECT_SOURCE_DIR}/include/vendor/base64.cpp
-    ${PROJECT_SOURCE_DIR}/include/messages.h
-    ${PROJECT_SOURCE_DIR}/src/messages.cpp
     ${PROJECT_SOURCE_DIR}/src/main.cpp
 )
 
@@ -25,6 +21,16 @@ add_custom_command(TARGET p2p PRE_BUILD
         -P ${CMAKE_CURRENT_SOURCE_DIR}/SetPath.cmake)
 
 file(COPY ${CMAKE_SOURCE_DIR}/certs DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+# messages
+add_library( messages
+    ${PROJECT_SOURCE_DIR}/include/vendor/base64.h
+    ${PROJECT_SOURCE_DIR}/include/vendor/base64.cpp
+    ${PROJECT_SOURCE_DIR}/include/file_handler.h
+    ${PROJECT_SOURCE_DIR}/src/file_handler.cpp
+    ${PROJECT_SOURCE_DIR}/include/messages.h
+    ${PROJECT_SOURCE_DIR}/src/messages.cpp
+)
 
 # Client library
 add_library(client
@@ -59,6 +65,14 @@ target_include_directories(p2p
         src
 )
 
+target_include_directories(messages
+    PUBLIC
+    include
+    PRIVATE
+    protos
+    src
+)
+
 target_include_directories(client
     PUBLIC
     include
@@ -67,11 +81,11 @@ target_include_directories(client
 )
 
 target_include_directories(cryptoRSA
-        PUBLIC
-        include
-        PRIVATE
-        protos
-        src
+    PUBLIC
+    include
+    PRIVATE
+    protos
+    src
 )
 
 add_subdirectory(server)
@@ -85,13 +99,17 @@ target_link_libraries(payload
     ${PROTOBUF_LIBRARY}
 )
 
+target_link_libraries(messages
+    payload
+)
+
 target_link_libraries(client
     cryptoRSA
+    messages
     ${CURL_LIBRARIES} 
     Threads::Threads
 )
 
 target_link_libraries(p2p 
-    payload
     client
 )
