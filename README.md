@@ -2,7 +2,14 @@
 P2P between different networks.
 
 Peer to peer file sharing, as well as sending messages to a peer without depending on a server to do the job for you. 
-This repository builds the `Peer` executable as well as the `Server` one. The latter working only as a mediator, since the connection will be established in the end only by the two peers. 
+
+This repository will create 3 executables.
+
+    1. p2p - Client executable
+    2. server - Server executable (to mediate peer connection)
+    3. test - basic unit tests
+
+After the peers have successfully connected to each other, the server is no longer needed.
 
 The process is as follows:
 
