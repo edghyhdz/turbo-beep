@@ -38,7 +38,7 @@ The server acts as a mediator for both peers to connect. Once both peers are onl
 
 It is not intentded to manage several clients, since it is not running any threads for socket management, so it might be showing bad behavior if overused. It is not intended to be run in production.
 
-#### P2P CLient
+#### P2P Client
 The `peer-to-peer` client is designed to interact with the included `server`. Upon connecting to the server, it will `authenticate`* to it and only after successful authentication, it will be able to proceed and connect to the other peer. It is assumed that the server has the public keys of each of the connecting peers.
 
 *(Authentication is based on a challenge/response, by signing a nonce and sending it back to the connecting party)
@@ -62,12 +62,12 @@ source server_p2p
 For peer1 trying to connect to peer2
 
 ```sh
-source p2p <hostname> <port> <build_directory>/certs/peer1/mykeypairs.pem ./certs/peer1/peer.pem
+source p2p <hostname> <port> <build_directory>/certs/peer1/mykeypairs.pem <build_directory>/certs/peer1/peer.pem
 ```
 For peer2 trying to connect to peer1
 
 ```sh
-source p2p <hostname> <port> <build_directory>/certs/peer2/mykeypairs.pem ./certs/peer2/peer.pem
+source p2p <hostname> <port> <build_directory>/certs/peer2/mykeypairs.pem <build_directory>/certs/peer2/peer.pem
 ```
 
 `<build_directory>/certs/peer2/peer.pem` is the other peer's public key, so in this example it would be peer1's public key
