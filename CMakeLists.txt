@@ -12,12 +12,17 @@ add_executable(p2p
     ${PROJECT_SOURCE_DIR}/src/main.cpp
 )
 
+# Copy installation file
+file(COPY ${CMAKE_SOURCE_DIR}/p2p.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 # Pass CERTIFICATES_PATH variable to SetPath.cmake
+set(P2P_EXE_PATH ${CMAKE_CURRENT_BINARY_DIR}/p2p)
 set(CERTIFICATES_PATH ${CMAKE_CURRENT_BINARY_DIR}/certs/)
 
 add_custom_command(TARGET p2p PRE_BUILD 
         COMMAND ${CMAKE_COMMAND} 
-        -DCERTIFICATES_PATH=${CERTIFICATES_PATH} 
+        -DCERTIFICATES_PATH=${CERTIFICATES_PATH}
+        -DP2P_EXE_PATH=${P2P_EXE_PATH} 
         -P ${CMAKE_CURRENT_SOURCE_DIR}/SetPath.cmake)
 
 file(COPY ${CMAKE_SOURCE_DIR}/certs DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -112,4 +117,11 @@ target_link_libraries(client
 
 target_link_libraries(p2p 
     client
+)
+
+FILE(WRITE ${CMAKE_BINARY_DIR}/install.sh
+"#!/bin/sh\n"
+"sudo mv ${CMAKE_BINARY_DIR}/p2p.sh /usr/local/bin/p2p\n" 
+"sudo chown root: /usr/local/bin/p2p\n"
+"sudo chmod 755 /usr/local/bin/p2p\n"
 )
