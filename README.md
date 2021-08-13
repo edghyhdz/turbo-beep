@@ -54,20 +54,20 @@ As per default, the port to which the server is connecting to is `54700` (You wi
 **Starting the Server** (In case you are running the server)
 
 ```sh
-source server_p2p
+<build_directory>/server/server
 ```
 
 **Starting the Client**
 
-For peer1 trying to connect to peer2
+For `peer1` trying to connect to `peer2`
 
 ```sh
-source p2p <hostname> <port> <build_directory>/certs/peer1/mykeypairs.pem <build_directory>/certs/peer1/peer.pem
+p2p <server_hostname> <server_port> <build_directory>/certs/peer1/mykeypairs.pem <build_directory>/certs/peer1/peer.pem
 ```
-For peer2 trying to connect to peer1
+For `peer2` trying to connect to `peer1`
 
 ```sh
-source p2p <hostname> <port> <build_directory>/certs/peer2/mykeypairs.pem <build_directory>/certs/peer2/peer.pem
+p2p <server_hostname> <server_port> <build_directory>/certs/peer2/mykeypairs.pem <build_directory>/certs/peer2/peer.pem
 ```
 
 `<build_directory>/certs/peer2/peer.pem` is the other peer's public key, so in this example it would be peer1's public key
@@ -77,9 +77,6 @@ If everything was done allright, this should have created a connection between t
 **Sending a file**
 
 If sending a file is what you want (Although not encrypted for now)
-
-
-`127.0.0.1` and the port `54000` could be changed for example to your own `TCP` address if you've got one. Of course, the server would have to be running on that address. 
 
 
 ## Dependencies
@@ -108,7 +105,7 @@ Clone this repository like so,
  # Finally
  source install.sh
  ```
-`install.sh` will run the final installation that will create a terimal shortcut named `server_p2p` and `p2p`. 
+`install.sh` will run the final installation that will create a terimal shortcut named `p2p`. 
  
 The final project folder structure is the following (the `certs` folder is included to have a working example after building up the project),
 
@@ -120,18 +117,17 @@ The final project folder structure is the following (the `certs` folder is inclu
     │   │   └─── hashed_key2   # peer1 hashed certificate with public key
     │   │   └─── peer1         # peer1 key pair and peer2 public key
     │   │   └─── peer2         # peer1 key pair and peer2 public key
-    │   ├── ./server             # Executable to run the server
-    │   ├── ./test               # Exe to run the tests
-    │   └── ./p2p                # Exe of peer (client)
+    │   ├── ./server           # Executable to run the server
+    │   ├── ./test             # Exe to run the tests
+    │   └── ./p2p              # Exe of peer (client)
     └── ...
 
 ## References
 The most relevant and helpful references are the following, 
 
 1. Taylor Conor's [`p2pcs`](https://github.com/taylorconor/p2psc) repository. Which is really well devleoped. Used it as inspriation and guidance, as well as for some useful references such as the mediator or peer handshake and other ideas. Although I did not use his libary on this project, it was of great help. 
-2. Code snipets from [here](https://www.programmersought.com/article/37955188510/) were taken ,for the RSA encryption part.[ProgrammerSought](https://www.programmersought.com/)
-3. To deal with protobuffers and sockets, I used [this](https://stackoverflow.com/a/11339251) stackoverflow answer as a basis, and adapted it to fit my project needs.
-3. Finally, to generate the key pairs I used [this](https://www.dynamsoft.com/codepool/how-to-use-openssl-generate-rsa-keys-cc.html) code snippet from [Dynamsoft](https://www.dynamsoft.com)
+2. Code snipets from [here](https://www.programmersought.com/article/37955188510/) were taken, for the RSA encryption part. [ProgrammerSought](https://www.programmersought.com/)
+3. To deal with protobuffers and sockets, I used [this](https://stackoverflow.com/a/11339251) stackoverflow answer as a reference, and adapted it to fit my project needs.
 
 More references can be found inside the code.
 
