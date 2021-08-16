@@ -48,7 +48,7 @@ An example of how a successful connection would look like is shown below,
 
 Peer 1 (Mexico)           |  Peer 2 (Switzerland)
 :-------------------------:|:-------------------------:
-![](https://github.com/edghyhdz/turbo-beep/blob/main/images/peer1_e.png)  |  ![](https://github.com/edghyhdz/turbo-beep/blob/main/images/peer1_e.png)
+![](https://github.com/edghyhdz/turbo-beep/blob/main/images/peer1_e.png)  |  ![](https://github.com/edghyhdz/turbo-beep/blob/main/images/peer2_e.png)
 
 Where Peer 1 advertised first, and thus authenticated to Peer 2 upon retrieving the information back from the server.
 
