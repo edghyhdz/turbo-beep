@@ -36,10 +36,10 @@ The server is intended to run on an open port. You can, i.e., open a port by usi
 
 The server acts as a mediator for both peers to connect. Once both peers are online, the server will be sending relevant information for the peers to connect to each other.
 
-It is not intentded to manage several clients, since it is not running any threads for socket management, so it might be showing bad behavior if overused. It is not intended to be run in production.
+It is not intentded to manage several clients, since it is not running any threads for socket management, so it might be showing bad behavior if overused. It is not intended to be run on production.
 
 #### P2P Client
-The `peer-to-peer` client is designed to interact with the included `server`. Upon connecting to the server, it will `authenticate`* to it and only after successful authentication, it will be able to proceed and connect to the other peer. It is assumed that the server has the public keys of each of the connecting peers.
+The `peer-to-peer` client is designed to interact with the included `server`. Upon connecting to the server, it will `authenticate`* to it and only after successful authentication, it will be able to proceed and connect to the other peer. It is assumed that the server has the public keys of each of the connecting peers (saved in the certs directory with the hashed public key as name).
 
 *(Authentication is based on a challenge/response, by signing a nonce and sending it back to the connecting party)
 
