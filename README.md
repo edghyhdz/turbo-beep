@@ -44,6 +44,15 @@ The `peer-to-peer` client is designed to interact with the included `server`. Up
 
 Once `peer1` connects to `peer2`, there is a second authentication step. For this step `peer1`, who advertised first, will be acting as the client, whereas `peer2` as the "to connect" party.
 
+An example of how a successful connection would look like is shown below, 
+
+Peer 1 (Mexico)           |  Peer 2 (Switzerland)
+:-------------------------:|:-------------------------:
+![](https://github.com/edghyhdz/turbo-beep/blob/main/images/peer1_e.png)  |  ![](https://github.com/edghyhdz/turbo-beep/blob/main/images/peer1_e.png)
+
+Where Peer 1 advertised first, and thus authenticated to Peer 2 upon retrieving the information back from the server.
+
+
 ## Usage
 
 Once the installation has been done,
