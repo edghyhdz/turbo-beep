@@ -1,7 +1,6 @@
 # Turbo-Beep 
-P2P between different networks.
 
-Peer to peer file sharing, as well as sending messages to a peer without depending on a server to do the job for you. 
+Peer to peer file sharing and messaging between different networks including server to act as a mediator.
 
 This repository will create 3 executables.
 
