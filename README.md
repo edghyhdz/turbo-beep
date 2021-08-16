@@ -59,25 +59,66 @@ As per default, the port to which the server is connecting to is `54700` (You wi
 
 **Starting the Client**
 
-For `peer1` trying to connect to `peer2`
+The 3 ways to use the `p2p` command tool and their corresponding flags are shown below,
 
+<ins>1. Easy mode</ins> 
+
+Flag: `-e`
+
+Description: Connect to other peer by providing an arbitrary username for you and the other peer (unencrypted).
+
+Example,
+
+For peer 1 (michel)
 ```sh
-p2p <server_hostname> <server_port> <build_directory>/certs/peer1/mykeypairs.pem <build_directory>/certs/peer1/peer.pem
+p2p -e <server host> <server port> michel roxana
 ```
-For `peer2` trying to connect to `peer1`
-
+ For peer 2 (roxana)
 ```sh
-p2p <server_hostname> <server_port> <build_directory>/certs/peer2/mykeypairs.pem <build_directory>/certs/peer2/peer.pem
+p2p -e <server host> <server port> roxana michel
 ```
 
-`<build_directory>/certs/peer2/peer.pem` is the other peer's public key, so in this example it would be peer1's public key
+<ins>2. Encrypted messaging</ins>
 
-If everything was done allright, this should have created a connection between two peers that are in two different networks. The messages that they exchange are encrypted with their corresponding private keys.
+Flag: `-m`
 
-**Sending a file**
+Description: Connect to other peer by providing the path of your key pair and the path of the other peer's public key
 
-If sending a file is what you want (Although not encrypted for now)
+Example,
 
+For peer 1
+```sh
+p2p -m <server host> <server port> ./certs/peer1/mykeypair.pem ./certs/peer1/peer.pem
+```
+Where peer1/peer.pem is peer2's public key
+
+ For peer 2
+```sh
+p2p -m <server host> <server port> ./certs/peer2/mykeypair.pem ./certs/peer2/peer.pem
+```
+Where peer2/peer.pem is peer1's public key
+
+<ins>3. File sharing (no encryption, for now)</ins>
+
+Flag: `-f` or `-r` (send file and receive file respectively)
+
+Description: Connect to other peer by providing the path of your key pair and the path of the other peer's public key. 
+
+After successfully connecting to other peer, send or receive a file depending on the flag given as argument.
+
+Example,
+
+For peer 1 (sending file)
+```sh
+p2p -f <server host> <server port> ./certs/peer1/mykeypair.pem ./certs/peer1/peer.pem /path/to/file.ext
+```
+Where peer1/peer.pem is peer2's public key
+
+ For peer 2 (receiving file)
+```sh
+p2p -r <server host> <server port> ./certs/peer2/mykeypair.pem ./certs/peer2/peer.pem
+```
+Where peer2/peer.pem is peer1's public key
 
 ## Dependencies
 
@@ -100,7 +141,7 @@ Clone this repository like so,
  mkdir build && cd build
 
  # cmake 
- cmake ..
+ cmake .. && make
 
  # Finally
  source install.sh
